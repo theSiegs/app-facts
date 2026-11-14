@@ -15,17 +15,14 @@
     "roblox": {"name": "Roblox"},
     "roblox-windows": {"name": "Roblox - Windows"},
     "roblox-xbox": {"name": "Roblox - Xbox"},
-    "rocket-league": {"name": "Rocket League®"},
-    "rocket-league-2": {"name": "Rocket League®"},
+    "rocket-league": {"name": "Rocket League®", "replaces": ["rocket-league-2"]},
     "sea-of-thieves": {"name": "Sea of Thieves"},
     "stardew-valley": {"name": "Stardew Valley"},
     "steam-app": {"name": "Steam"},
     "super-smash-bros-ultimate": {"name": "Super Smash Bros. Ultimate"},
     "terraria": {"name": "Terraria"},
-    "xbox": {"name": "XBOX"},
-    "xbox-app": {"name": "Xbox"},
-    "youtube": {"name": "YouTube"},
-    "youtube-2": {"name": "YouTube"},
+    "xbox": {"name": "XBOX", "replaces": ["xbox-app"]},
+    "youtube": {"name": "YouTube", "replaces": ["youtube-2"]},
     "youtube-kids": {"name": "YouTube Kids"}
   }
 }

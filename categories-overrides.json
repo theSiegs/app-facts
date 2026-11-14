@@ -69,7 +69,7 @@
     "com.life360.android.safetymapd": {"category": "maps"},
     "com.microsoft.copilot": {"kind": "assistant"},
     "com.microsoft.familysafety": {"category": "productivity"},
-    "com.microsoft.xboxone.smartglass": {"app": "xbox-app"},
+    "com.microsoft.xboxone.smartglass": {"app": "xbox"},
     "com.mojang.minecraftpe": {"app": "minecraft"},
     "com.mubi": {"category": "video", "detail": "streaming"},
     "com.nbcuni.nbc": {"category": "video", "detail": "streaming"},
