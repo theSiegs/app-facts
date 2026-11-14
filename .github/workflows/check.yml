@@ -17,6 +17,10 @@
 # review). Its files merge on their own too, except: an escalate/* branch (the reviewer agent's escalations)
 # waits for the owner, and a pull request from a bot's branch (categories/*, draft/*, edit/*) that touches an
 # overrides file waits too, so no token but the owner's can confirm a value by override.
+# Notifications Glint hides (README.md, "Hidden notifications"): hidden.json is checked by tools/check_hidden.py
+# (what Glint's parser accepts, strictly, and no personal data) and merges on its own when it passes, except
+# from a bot's branch (categories/*, draft/*, edit/*), which waits for the owner: it hides notifications on
+# every phone.
 name: check
 
 on:
@@ -54,6 +58,9 @@ jobs:
           else
             python3 tools/check_categories.py
           fi
+
+      - name: Check the notifications Glint hides
+        run: python3 tools/check_hidden.py
 
       - name: Check the app catalog
         env:
@@ -103,11 +110,11 @@ jobs:
         run: |
           files="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[] | .filename, (.previous_filename // empty)')"
           printf '%s\n' "$files"
-          other="$(printf '%s\n' "$files" | grep -vE '^(recipes/[^/]+\.json|fixtures/[^/]+/[^/]+\.json|revoked\.txt|categories\.json|categories-overrides\.json|catalog/(keys|apps|overrides|normalize-vectors)\.json|catalog/evidence/[^/]+\.json)$' || true)"
+          other="$(printf '%s\n' "$files" | grep -vE '^(recipes/[^/]+\.json|fixtures/[^/]+/[^/]+\.json|revoked\.txt|categories\.json|categories-overrides\.json|hidden\.json|catalog/(keys|apps|overrides|normalize-vectors)\.json|catalog/evidence/[^/]+\.json)$' || true)"
           if [ -n "$files" ] && [ -z "$other" ]; then
             echo "ok=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::notice::Not auto-merged: the pull request changes files outside recipes/, fixtures/, revoked.txt, the categories files and catalog/."
+            echo "::notice::Not auto-merged: the pull request changes files outside recipes/, fixtures/, revoked.txt, the categories files, hidden.json and catalog/."
             echo "ok=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -134,8 +141,8 @@ jobs:
           esac
           case "$HEAD_REF" in
             categories/*|draft/*|edit/*)
-              if gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[].filename' | grep -qE '^(categories-overrides\.json|catalog/overrides\.json)$'; then
-                [ -n "$why" ] || why="a bot's branch changes an overrides file"
+              if gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[].filename' | grep -qE '^(categories-overrides\.json|catalog/overrides\.json|hidden\.json)$'; then
+                [ -n "$why" ] || why="a bot's branch changes an overrides file or hidden.json"
               fi ;;
           esac
           files="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[] | select(.status != "removed") | .filename')"

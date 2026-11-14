@@ -14,11 +14,13 @@ with the tile exchange switched on, it fetches the rest from here.
 | `categories.json` | App categories: one line per Android package, written by the intake's nightly classifier (below). |
 | `categories-overrides.json` | Hand corrections to the categories; they always win. |
 | `catalog/` | The cross-platform app catalog: `keys.json` (Xbox, Microsoft Store, Windows, Steam, Switch and web keys), `apps.json` (app slugs), `overrides.json`, `evidence/` (the reviewer agent's records) and `normalize-vectors.json` (see "App catalog"). |
+| `hidden.json` | Glint's starter list of notifications it hides (see "Hidden notifications"). |
 | `revoked.txt` | Recipes withdrawn from the exchange: one `id` or `id@rev` per line. |
 | `keys/exchange-1.pub`, `keys/exchange-2.pub` | The publishing public keys (base64 of the raw 32-byte Ed25519 key). |
 | `checker/` | A standalone copy of Glint's recipe checker and shape learner (Kotlin), with its own Gradle build. |
 | `tools/build_index.py` | Builds and signs the published site (Python, standard library only). |
 | `tools/check_categories.py` | Checks the two categories files and merges them for publishing (and `tools/test_check_categories.py`). |
+| `tools/check_hidden.py` | Checks `hidden.json` (and `tools/test_check_hidden.py`). |
 | `tools/check_catalog.py` | Checks the app catalog, computes each entry's state and builds its shards (and `tools/test_check_catalog.py`). |
 
 Only recipe files and synthetic or scrubbed fixtures live here. There is no one's real notification
@@ -27,8 +29,8 @@ and describes text, nothing more.
 
 ## How a recipe gets in
 
-1. A pull request adds or changes files under `recipes/`, `fixtures/`, `revoked.txt` or the
-   categories files (see "App categories").
+1. A pull request adds or changes files under `recipes/`, `fixtures/`, `revoked.txt`, the
+   categories files (see "App categories") or `hidden.json` (see "Hidden notifications").
 2. `check.yml` builds the checker and checks every recipe against the schema and its fixtures. The
    catalog also refuses any recipe or fixture for a chat app or a health or payment app, the generic
    recipe (it is built into Glint), a recipe with no fixtures, and any fixture that isn't marked
@@ -49,6 +51,7 @@ Run the same steps locally (JDK 17 or newer, Python 3):
 ./checker/gradlew -p checker learn --args="fixtures/com.dd.doordash"   # the shape learner, no AI
 ./checker/gradlew -p checker installDist                              # both as jars, for the intake's drafting job
 python tools/check_categories.py                                       # the categories files
+python tools/check_hidden.py                                           # the notifications Glint hides
 python tools/check_catalog.py                                          # the app catalog (add --base <old tree> for the caps)
 python -m unittest discover -s tools                                   # the checker's tests
 python tools/build_index.py --out site                                 # unsigned dry run
@@ -168,6 +171,36 @@ override sets the category; one that only names the app or its glance still gets
 the classifier. Either commit to `main` (the push
 publishes) or open a one-line pull request from a branch of this repo: it is checked and merged on its
 own, and the merge publishes. Phones pick it up at their next update check with the tile exchange on.
+
+## Hidden notifications
+
+`hidden.json` is Glint's starter list of notifications it hides (format `glint.hidden/1`, Glint's
+`docs/contracts/hidden-notifications.md`): reminders and promotions that aren't news, which every phone
+gets marked "from glint" and can turn off one by one. Glint also ships a copy, used until it has fetched
+this one.
+
+```json
+{
+  "format": "glint.hidden/1",
+  "rules": [
+    {"id": "messages-device-pairing", "pkg": "com.google.android.apps.messaging",
+     "titlePattern": "Device pairing", "action": "hide_and_clear", "why": "Not a message."}
+  ]
+}
+```
+
+A rule names the app (`pkg`) and a notification `channel`, a `titlePattern` (the whole title, ignoring
+case; `*` is one or more characters, `\*` a literal star) or both, never a whole app. `action` is `hide`
+(the default) or `hide_and_clear` (also clear it from the shade). `id` is stable: a phone keeps its "turned
+off" choice by id, so never reuse one for another notification. `why` is for people reading the file.
+
+The build publishes it as `c/<hash>.json` and names it in the signed index as `hidden` (path, SHA-256 and
+rule count), as it does the categories; an index without it leaves phones on their bundled copy.
+`tools/check_hidden.py` refuses anything Glint's parser would skip (a bad id or a repeated one, a package
+that isn't an Android package name, a pattern that is only stars or over 200 characters, an unknown
+action, more than 500 rules) and any email address, link or phone number in its text. A pull request
+that changes it merges on its own when the check passes, except from a bot's branch (`categories/*`,
+`draft/*`, `edit/*`), which waits for the owner.
 
 ## App catalog
 

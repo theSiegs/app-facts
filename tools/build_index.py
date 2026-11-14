@@ -17,6 +17,9 @@ Writes, per the glint.exchange/1 contract (README.md):
                          by content; the index's "catalog" entry lists each one's path, SHA-256 and count.
                          The categories file above also gains each Android entry's detail, state and
                          source, which older Glint ignores.
+  site/c/<sha256[:16]>.json  also Glint's starter list of notifications it hides (hidden.json, glint.hidden/1,
+                         tools/check_hidden.py), named by content; the index's "hidden" entry gives its path,
+                         SHA-256 and count (rules)
   site/index.json.sig    with --key: base64 of the raw 64-byte Ed25519 signature over index.json
                          (signed with `openssl pkeyutl -sign -rawin`)
 With --verify, the signature is checked with openssl against each raw base64 public key given
@@ -38,6 +41,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_categories  # noqa: E402
 import check_catalog  # noqa: E402
+import check_hidden  # noqa: E402
 
 FORMAT = "glint.exchange/1"
 RANK = {"verified": 3, "built-in": 2, "unverified": 1, "learned": 0}  # "draft" is never published
@@ -181,11 +185,27 @@ def main():
                          ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         digest = hashlib.sha256(doc).hexdigest()
         path = f"c/{digest[:16]}.json"
-        os.makedirs(os.path.join(a.out, "c"))
+        os.makedirs(os.path.join(a.out, "c"), exist_ok=True)
         with open(os.path.join(a.out, path), "wb") as f:
             f.write(doc)
         index["categories"] = {"path": path, "sha256": digest,
                                "count": sum(1 for v in published.values() if "category" in v)}
+    # Notifications Glint hides (README.md, "Hidden notifications"): its starter list, one file trusted through
+    # the index's SHA-256 like the categories. An added key, so older Glint reads the index as before; without
+    # one, Glint uses its bundled copy.
+    try:
+        rules = check_hidden.load(a.root)
+    except check_hidden.Bad as e:
+        fail(str(e))
+    if rules is not None:
+        doc = json.dumps({"format": check_hidden.FORMAT, "rules": rules},
+                         ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        digest = hashlib.sha256(doc).hexdigest()
+        path = f"c/{digest[:16]}.json"
+        os.makedirs(os.path.join(a.out, "c"), exist_ok=True)
+        with open(os.path.join(a.out, path), "wb") as f:
+            f.write(doc)
+        index["hidden"] = {"path": path, "sha256": digest, "count": len(rules)}
     # The app catalog (README.md, "App catalog"): one content-addressed file per platform. An added key,
     # so older Glint and Hearth read the index as before.
     if shards:
@@ -209,7 +229,8 @@ def main():
         f.write(index_bytes)
     print(f"index.json: seq {seq}, {len(apps)} apps, {len(revoked)} revoked, "
           f"{index['categories']['count'] if 'categories' in index else 0} app categories, "
-          f"{sum(v['count'] for v in index.get('catalog', {}).get('shards', {}).values())} catalog keys")
+          f"{sum(v['count'] for v in index.get('catalog', {}).get('shards', {}).values())} catalog keys, "
+          f"{index['hidden']['count'] if 'hidden' in index else 0} hidden notification rules")
 
     if a.key:
         sig = sign(index_path, a.key)

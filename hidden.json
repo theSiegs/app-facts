@@ -1,0 +1,12 @@
+{
+  "format": "glint.hidden/1",
+  "rules": [
+    {
+      "id": "messages-device-pairing",
+      "pkg": "com.google.android.apps.messaging",
+      "titlePattern": "Device pairing",
+      "action": "hide_and_clear",
+      "why": "Google Messages' reminder that messages are available on a paired device; not a message. Its channel isn't known yet, so it's matched by title on any channel."
+    }
+  ]
+}
