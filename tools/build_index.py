@@ -20,6 +20,9 @@ Writes, per the glint.exchange/1 contract (README.md):
   site/c/<sha256[:16]>.json  also Glint's starter list of notifications it hides (hidden.json, glint.hidden/1,
                          tools/check_hidden.py), named by content; the index's "hidden" entry gives its path,
                          SHA-256 and count (rules)
+  site/c/<sha256[:16]>.json  also the values table (catalog/values.json, glint.values/1, tools/values.py): every
+                         category and detail with its parent, label and Hearth's default pool; the index's
+                         "values" entry gives its path, SHA-256 and count (categories plus details)
   site/index.json.sig    with --key: base64 of the raw 64-byte Ed25519 signature over index.json
                          (signed with `openssl pkeyutl -sign -rawin`)
 With --verify, the signature is checked with openssl against each raw base64 public key given
@@ -42,6 +45,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_categories  # noqa: E402
 import check_catalog  # noqa: E402
 import check_hidden  # noqa: E402
+import values  # noqa: E402
 
 FORMAT = "glint.exchange/1"
 RANK = {"verified": 3, "built-in": 2, "unverified": 1, "learned": 0}  # "draft" is never published
@@ -206,6 +210,20 @@ def main():
         with open(os.path.join(a.out, path), "wb") as f:
             f.write(doc)
         index["hidden"] = {"path": path, "sha256": digest, "count": len(rules)}
+    # The values table (README.md, "Values"): every category and detail with its label and Hearth's default,
+    # trusted through the index's SHA-256 like the categories. An added key, so older readers ignore it.
+    try:
+        table = values.load(a.root)
+    except values.Bad as e:
+        fail(str(e))
+    if table is not None:
+        doc = json.dumps(table.data, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        digest = hashlib.sha256(doc).hexdigest()
+        path = f"c/{digest[:16]}.json"
+        os.makedirs(os.path.join(a.out, "c"), exist_ok=True)
+        with open(os.path.join(a.out, path), "wb") as f:
+            f.write(doc)
+        index["values"] = {"path": path, "sha256": digest, "count": len(table.categories) + len(table.details)}
     # The app catalog (README.md, "App catalog"): one content-addressed file per platform. An added key,
     # so older Glint and Hearth read the index as before.
     if shards:
@@ -230,7 +248,8 @@ def main():
     print(f"index.json: seq {seq}, {len(apps)} apps, {len(revoked)} revoked, "
           f"{index['categories']['count'] if 'categories' in index else 0} app categories, "
           f"{sum(v['count'] for v in index.get('catalog', {}).get('shards', {}).values())} catalog keys, "
-          f"{index['hidden']['count'] if 'hidden' in index else 0} hidden notification rules")
+          f"{index['hidden']['count'] if 'hidden' in index else 0} hidden notification rules, "
+          f"{index['values']['count'] if 'values' in index else 0} values")
 
     if a.key:
         sig = sign(index_path, a.key)

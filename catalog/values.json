@@ -1,0 +1,23 @@
+{
+  "format": "glint.values/1",
+  "categories": {
+    "game": {"label": "Games", "pool": "games"},
+    "video": {"label": "Video", "pool": "other"},
+    "audio": {"label": "Music and audio", "pool": "other", "pool_names": ["music", "audio"]},
+    "image": {"label": "Photos and art", "pool": "other"},
+    "social": {"label": "Social", "pool": "social"},
+    "news": {"label": "News", "pool": "other"},
+    "maps": {"label": "Maps", "pool": "other"},
+    "productivity": {"label": "Productivity", "pool": "other"},
+    "accessibility": {"label": "Accessibility", "pool": "other", "loose": true},
+    "messaging": {"label": "Messaging", "pool": "messaging", "outside_all": true, "loose": true}
+  },
+  "details": {
+    "youtube": {"label": "YouTube", "parents": ["video"], "pool": "other", "pool_names": ["youtube"]},
+    "streaming": {"label": "Streaming", "parents": ["video"], "pool": "other", "pool_names": ["streaming", "tv", "shows"]},
+    "education": {"label": "Education", "parents": ["productivity", null], "pool": "other", "pool_names": ["homework", "school", "education", "learning"], "loose": true},
+    "companion": {"label": "Companion apps", "parents": ["productivity", null], "pool": "other", "loose": true},
+    "system": {"label": "System apps", "parents": ["productivity", null], "pool": "other", "loose": true},
+    "browser": {"label": "Web browsers", "parents": [null], "pool": "other"}
+  }
+}

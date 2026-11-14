@@ -6,7 +6,7 @@
 categories.json (written by the intake's nightly classifier) and categories-overrides.json (written by
 hand; it always wins) must pass:
   - schema: their format, an "apps" object, and per app only the known keys with the right types
-  - categories in the allowed set (Hearth HA's APP_CATEGORIES plus messaging, or "unknown")
+  - categories in the allowed set (catalog/values.json, tools/values.py; or "unknown")
   - a glance, when there is one, in the allowed set (which of Glint's glances an app's tile borrows)
   - a kind, when there is one, in the allowed set (what Glint's kind recipes and Car tile key on)
   - package names in Android's format
@@ -21,10 +21,14 @@ import os
 import re
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import values  # noqa: E402
+
 FORMAT = "glint.categories/1"
 OVERRIDES_FORMAT = "glint.categories-overrides/1"
-CATEGORIES = ("game", "video", "audio", "image", "social", "news", "maps", "productivity", "accessibility", "messaging")
-UNKNOWN = "unknown"
+# The categories: the values table's (catalog/values.json), Hearth HA's APP_CATEGORIES plus messaging
+CATEGORIES = values.TABLE.categories
+UNKNOWN = values.UNKNOWN
 # Which of Glint's glances an app's tile borrows when it has nothing waiting: Glint's own photos, music,
 # calendar, clock and weather glances; "car", reserved for a car glance Glint doesn't have yet (Glint
 # falls back to its own guess); "calls", a calling app (Google Voice and the like) whose voicemails,
@@ -50,8 +54,7 @@ PUBLISHED = ("category", "name", "glance", "kind")
 OVERRIDE_KEYS = PUBLISHED + ("detail", "app")
 
 
-class Bad(Exception):
-    pass
+Bad = values.Bad  # one error for every check
 
 
 def check_name(where, name):
