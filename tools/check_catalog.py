@@ -51,6 +51,10 @@ DETAIL_CATEGORIES = {
     "system": ("productivity", None),
 }
 LOOSE = ("education", "companion", "system")
+# Categories that take an app out of screen time or out of pausing (Hearth: messaging is outside All screen
+# time, accessibility is never paused): a move into one loosens a limit, so like a LOOSE detail it is confirmed
+# only by an override or a passing review, never by a store rule.
+LOOSE_CATEGORIES = ("messaging", "accessibility")
 CAP = cc.CAP
 
 SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{1,39}$")
@@ -72,9 +76,27 @@ SHARDS = ("android", "msstore", "xbox", "pfn", "fs", "steam", "switch", "web", "
 
 # Source tags in catalog/keys.json and what a confirmed entry's coarse source is
 KEY_SOURCE = re.compile(r"^(store:(Game|Application)|steam:(game|software)|platform:switch|ai(:[A-Za-z0-9_]{1,40})?|ai-search|match)$")
-# Play genres the classifier maps by a fixed rule (the intake's classifying.GENRES)
-PLAY_RULE = re.compile(r"^play:(GAME_[A-Z_]+|SOCIAL|DATING|COMMUNICATION|VIDEO_PLAYERS|MUSIC_AND_AUDIO|NEWS_AND_MAGAZINES|"
+# Play genres the classifier maps by a fixed rule, and the category the rule gives (the intake's
+# classifying.GENRES, every GAME_* genre a game). A play: tag confirms only that category, and never a LOOSE
+# category: Communication holds web browsers, hearing and accessibility tools as well as messengers, so a
+# play:COMMUNICATION messenger is suggested until an override or a passing review confirms it.
+PLAY_RULE = re.compile(r"^play:(GAME_[A-Z_]+|SOCIAL|DATING|VIDEO_PLAYERS|MUSIC_AND_AUDIO|NEWS_AND_MAGAZINES|"
                        r"MAPS_AND_NAVIGATION|PHOTOGRAPHY|ART_AND_DESIGN|PRODUCTIVITY|TOOLS|BUSINESS)$")
+PLAY_GENRES = {"SOCIAL": "social", "DATING": "social", "VIDEO_PLAYERS": "video", "MUSIC_AND_AUDIO": "audio",
+               "NEWS_AND_MAGAZINES": "news", "MAPS_AND_NAVIGATION": "maps", "PHOTOGRAPHY": "image",
+               "ART_AND_DESIGN": "image", "PRODUCTIVITY": "productivity", "TOOLS": "productivity",
+               "BUSINESS": "productivity"}
+
+
+def play_rule_confirms(tag, category):
+    """Whether a play:<GENRE> source [tag] confirms [category] by the classifier's fixed rule: the genre is in the
+    map and gives that category (never a LOOSE_CATEGORIES one)."""
+    m = PLAY_RULE.match(tag or "")
+    if not m or category in LOOSE_CATEGORIES:
+        return False
+    genre = m.group(1)
+    return category == ("game" if genre.startswith("GAME_") else PLAY_GENRES[genre])
+
 
 EVIDENCE_ID = re.compile(r"^\d{4}-\d{2}-\d{2}-[a-z]+-[A-Za-z0-9-]{1,120}$")
 FACT_HOSTS = ("displaycatalog.mp.microsoft.com", "play.google.com", "store.steampowered.com", "www.nintendo.com",
@@ -288,7 +310,7 @@ def evidence_passes(rec, key, category, detail):
         return False, "fewer than two judges with different prompts agree"
     if not any(f["kind"] in ("store", "web") and urlparse(f["url"]).hostname in FACT_HOSTS for f in rec["facts"]):
         return False, "no store or web fact from an allowed host"
-    if rec["game_signals"] and (detail in LOOSE or want["category"] != "game"):
+    if rec["game_signals"] and (detail in LOOSE or want["category"] != "game"):  # covers LOOSE_CATEGORIES too
         return False, "game signals stand against a value that isn't a game"
     return True, ""
 
@@ -381,14 +403,10 @@ def _resolve(key, entry, overrides, app_override, evidence):
         state, source = "confirmed", "review"
     else:
         rule = None
-        if PLAY_RULE.match(tag):
+        if play_rule_confirms(tag, category):
             rule = "play"
-        elif tag == "store:Game":
-            rule = "store"
-        elif tag == "steam:game":
-            rule = "steam"
-        elif tag == "platform:switch":
-            rule = "platform"
+        elif category == "game" and tag in ("store:Game", "steam:game", "platform:switch"):
+            rule = tag.split(":")[0]  # the store rules confirm a game, nothing else
         if rule is not None:
             state, source = "confirmed", rule
             # A detail on a rule-confirmed entry needs an override or a review: it is held back, not shown
@@ -396,7 +414,8 @@ def _resolve(key, entry, overrides, app_override, evidence):
             detail = None
         else:
             state = "suggested"
-            source = {"store": "store", "steam": "steam", "platform": "platform", "match": "match"}.get(tag.split(":")[0], "ai")
+            source = {"play": "play", "store": "store", "steam": "steam", "platform": "platform",
+                      "match": "match"}.get(tag.split(":")[0], "ai")
     if category is not None:
         out["category"] = category
     if detail is not None:
