@@ -18,8 +18,9 @@ evidence record passes (evidence_passes). A "detail" (youtube, streaming, educat
 published on a confirmed entry only when an override or a passing review gave it. The state is computed
 here, never written in a source file.
 
-With --base: at most CAP keys added, removed or changed (Android and other platforms together), and a key
-that was a confirmed game may stop being one only through an override or a passing review.
+With --base: at most CAP keys added, removed or changed (Android and other platforms together), a key
+that was a confirmed game may stop being one only through an override or a passing review, and the values
+table (catalog/values.json) only adds values (tools/values.py).
 """
 import argparse
 import json
@@ -31,6 +32,7 @@ from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_categories as cc  # noqa: E402
+import values  # noqa: E402
 
 FORMAT = "glint.catalog/1"
 KEYS_FORMAT = "glint.catalog-keys/1"
@@ -41,20 +43,16 @@ VECTORS_FORMAT = "glint.catalog-normalize/1"
 
 CATEGORIES = cc.CATEGORIES
 UNKNOWN = cc.UNKNOWN
-DETAILS = ("youtube", "streaming", "education", "companion", "system")
-# Which categories a detail may sit under (None: no category)
-DETAIL_CATEGORIES = {
-    "youtube": ("video",),
-    "streaming": ("video",),
-    "education": ("productivity", None),
-    "companion": ("productivity", None),
-    "system": ("productivity", None),
-}
-LOOSE = ("education", "companion", "system")
+# The details, which categories each may sit under (None: no category), and the loose values: all from the
+# values table (catalog/values.json, tools/values.py).
+DETAILS = values.TABLE.details
+DETAIL_CATEGORIES = values.TABLE.detail_categories
+# Details that can lift a limit (education, companion, system): confirmed only by an override or a passing review.
+LOOSE = values.TABLE.loose_details
 # Categories that take an app out of screen time or out of pausing (Hearth: messaging is outside All screen
 # time, accessibility is never paused): a move into one loosens a limit, so like a LOOSE detail it is confirmed
 # only by an override or a passing review, never by a store rule.
-LOOSE_CATEGORIES = ("messaging", "accessibility")
+LOOSE_CATEGORIES = values.TABLE.loose_categories
 CAP = cc.CAP
 
 SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{1,39}$")
@@ -337,8 +335,8 @@ def load(root):
         if isinstance(v, dict):
             if "app" in v:
                 check_slug(f"categories-overrides.json {pkg}", v["app"], apps)
-            if "detail" in v and v["detail"] not in DETAILS:
-                raise Bad(f"categories-overrides.json {pkg}: detail {v['detail']!r} is not one of {DETAILS}")
+            if "detail" in v:  # under the category the app ends up with (the override's, else the classifier's)
+                check_detail(f"categories-overrides.json {pkg}", v.get("category", (cats.get(pkg) or {}).get("category")), v["detail"])
     keys_doc = load_json(os.path.join(cat_dir, "keys.json"))
     keys = check_keys(keys_doc, apps) if keys_doc is not None else {}
     ov_doc = load_json(os.path.join(cat_dir, "overrides.json"))
@@ -503,6 +501,15 @@ def unreviewed_ungaming(old, new):
     return sorted(out)
 
 
+def values_only_added(base, root):
+    """Refuses a values table at [root] that removes, renames or un-looses a value of the one at [base]."""
+    old_values, new_values = values.load(base), values.load(root)
+    if old_values is not None:
+        if new_values is None:
+            raise Bad("catalog/values.json is gone; the values table is add-only")
+        values.check_base(old_values, new_values)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", default=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -512,6 +519,7 @@ def main():
         src = load(a.root)
         shards = published(src)
         if a.base:
+            values_only_added(a.base, a.root)
             old = published(load(a.base))
             diff = changes(old, shards)
             print(f"catalog: {len(diff)} keys added, removed or changed against the base")

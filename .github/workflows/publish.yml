@@ -80,6 +80,11 @@ jobs:
             test "$(sha256sum "site/$(jq -r .hidden.path site/index.json)" | cut -d' ' -f1)" = "$(jq -r .hidden.sha256 site/index.json)"
             echo "hidden: $(jq -r .hidden.count site/index.json) rules, $(jq -r .hidden.path site/index.json)"
           fi
+          # And the values table (every category and detail); publishing without it is an error.
+          jq -e '.values' site/index.json >/dev/null
+          test "$(sha256sum "site/$(jq -r .values.path site/index.json)" | cut -d' ' -f1)" = "$(jq -r .values.sha256 site/index.json)"
+          jq -e '.format == "glint.values/1"' "site/$(jq -r .values.path site/index.json)" >/dev/null
+          echo "values: $(jq -r .values.count site/index.json) categories and details, $(jq -r .values.path site/index.json)"
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

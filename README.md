@@ -100,8 +100,8 @@ the scrubber's common-word list (`checker/src/main/resources/glint/common-words.
 ## App categories
 
 `categories.json` says what kind of app a package is: `game`, `video`, `audio`, `image`, `social`,
-`news`, `maps`, `productivity`, `accessibility` or `messaging` (Hearth HA's app categories), or
-`unknown`. Glint uses it for an app's glyph when nothing else says what the app is, and passes it to
+`news`, `maps`, `productivity`, `accessibility` or `messaging` (Hearth HA's app categories; the values
+table, below, lists them), or `unknown`. Glint uses it for an app's glyph when nothing else says what the app is, and passes it to
 Hearth HA's screen time as `catalog_categories` (Hearth prefers the category the app declares itself).
 
 ```json
@@ -234,8 +234,8 @@ edition" or " edition" removed; every run of other characters than a-z and 0-9 b
 
 | Field | Values |
 |---|---|
-| `category` | The ten above, **frozen**: older Glint and Hearth drop a value they don't know. |
-| `detail` | `youtube`, `streaming` (both under `video`), `education`, `companion`, `system` (under `productivity` or no category). Only added to, never changed. Educational games are `game` with no detail. |
+| `category` | The ten above, from the values table (below). Add-only; a new one only when Android adds a category, or for a need as basic as messaging. Older Glint and Hearth drop a value they don't know (Other in Hearth: never looser). |
+| `detail` | `youtube`, `streaming` (both under `video`), `education`, `companion`, `system` (under `productivity` or no category), `browser` (web browsers; no category). From the values table, add-only. Educational games are `game` with no detail. |
 | `app`, `name` | The slug and the app's title. |
 | `state` | `confirmed` or `suggested`, **computed when publishing, never written in a source file**. |
 | `source` | `override`, `play`, `store`, `steam`, `platform`, `ai`, `match` or `review`. |
@@ -249,7 +249,7 @@ a match by name, a Store application, Steam software) is `suggested`. A `detail`
 when an override or a passing review gave it; on a suggested entry it shows as suggested. Glint and Hearth never
 let a suggested value loosen a limit.
 
-**Loose values.** A detail of `education`, `companion` or `system`, and the categories `messaging` (Hearth counts
+**Loose values.** The values the table marks `loose`: a detail of `education`, `companion` or `system`, and the categories `messaging` (Hearth counts
 chat outside screen time) and `accessibility` (Hearth never pauses it), can lift a limit. No store rule confirms
 them: only an override or a passing review. Play's Communication genre holds web browsers and hearing tools as
 well as messengers, so a messenger the classifier filed from it stays suggested until one of those confirms it.
@@ -266,6 +266,36 @@ changed, and no confirmed game stops being one without an override or a review. 
 (`categories/*`) merge on their own. The reviewer agent's escalations come as a weekly `escalate/<date>` pull
 request that waits for the owner: merging it accepts its overrides, closing it rejects them. A pull request from
 a bot's branch (`categories/*`, `draft/*`, `edit/*`) that touches an overrides file waits for the owner too.
+
+### Values
+
+`catalog/values.json` (`glint.values/1`) is the one list of every category and detail. The checkers here, the
+intake's classifier and reviewer, and the relay all read it; nobody keeps a copy of their own.
+
+```json
+{"format": "glint.values/1",
+ "categories": {"messaging": {"label": "Messaging", "pool": "messaging", "outside_all": true, "loose": true}},
+ "details": {"browser": {"label": "Web browsers", "parents": [null], "pool": "other"}}}
+```
+
+Each value has a short `label` and Hearth's default `pool` (`games`, `social`, `messaging` or `other`), and may
+have `pool_names` (a household's own pool of that name takes it, else `pool`), `loose` (it can lift a limit, so
+only an override or a passing review confirms it) and `outside_all` (Hearth counts it outside All screen time).
+A detail also has `parents`, the categories it may sit under (`null`: no category). `tools/values.py` checks it.
+The build publishes it as `c/<hash>.json` and names it in the signed index as `values` (path, SHA-256 and count),
+so readers get labels for new values without a release.
+
+**How it grows: add-only, the owner decides, one step.**
+1. Values are only added. None is removed or renamed in place, and none stops being loose:
+   `tools/check_catalog.py --base` refuses that against the base. A needed rename is a one-step migration
+   (overrides first, then the Glint and Hearth releases).
+2. The owner decides each new value, never the classifier, the reviewer or a model. A pull request that changes
+   `catalog/values.json` never merges on its own. A proposal names the decision it changes, Hearth's default,
+   what Glint does with it, the apps (about five, or one safety case), and why a `kind`, `glance` or flag won't do.
+3. New values default to Other in Hearth. One that would take time out of All screen time or out of a pool is
+   `loose`.
+4. Gaps wait in `unknown`: published as nothing, Other in Hearth, the phone's own guess in Glint.
+5. Growth goes into `detail`; a category is added only when Android adds one, or for a need as basic as messaging.
 
 ### Published (`glint.catalog/1`)
 
@@ -289,7 +319,8 @@ Base URL (configurable in Glint; default `https://thesiegs.github.io/glint-recip
    "apps":{"<package>":{"id":"<recipe id>","rev":<int>,"sha256":"<lowercase hex of the recipe file bytes>",
                         "status":"<the recipe's meta.status>"}},
    "revoked":["<recipe id>" | "<recipe id>@<rev>", ...],
-   "categories":{"path":"c/<first 16 hex of sha256>.json","sha256":"<lowercase hex of the file bytes>","count":<int>}}
+   "categories":{"path":"c/<first 16 hex of sha256>.json","sha256":"<lowercase hex of the file bytes>","count":<int>},
+   "values":{"path":"c/<first 16 hex of sha256>.json","sha256":"...","count":<categories plus details>}}
   ```
 
   One entry per package: the catalog's best recipe for it (status `verified`, then `built-in`, then

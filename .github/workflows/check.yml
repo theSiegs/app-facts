@@ -17,6 +17,8 @@
 # review). Its files merge on their own too, except: an escalate/* branch (the reviewer agent's escalations)
 # waits for the owner, and a pull request from a bot's branch (categories/*, draft/*, edit/*) that touches an
 # overrides file waits too, so no token but the owner's can confirm a value by override.
+# The values table (README.md, "Values"): catalog/values.json is checked by tools/values.py through
+# tools/check_catalog.py (add-only against the base) and never merges on its own: the owner decides each value.
 # Notifications Glint hides (README.md, "Hidden notifications"): hidden.json is checked by tools/check_hidden.py
 # (what Glint's parser accepts, strictly, and no personal data) and merges on its own when it passes, except
 # from a bot's branch (categories/*, draft/*, edit/*), which waits for the owner: it hides notifications on
