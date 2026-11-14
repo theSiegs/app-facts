@@ -25,11 +25,19 @@
       "category": "productivity",
       "detail": "companion"
     },
+    "app:xbox": {
+      "category": "productivity",
+      "detail": "companion"
+    },
     "app:xbox-app": {
       "category": "productivity",
       "detail": "companion"
     },
     "app:youtube": {
+      "category": "video",
+      "detail": "youtube"
+    },
+    "app:youtube-2": {
       "category": "video",
       "detail": "youtube"
     },
