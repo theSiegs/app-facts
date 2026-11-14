@@ -242,11 +242,17 @@ edition" or " edition" removed; every run of other characters than a-z and 0-9 b
 | `checked` | When the facts were last read. |
 
 **When an entry is confirmed:** an override (`categories-overrides.json`, `catalog/overrides.json`, by key or by
-`app:<slug>`; a key's beats its app's); a store rule (Play's genre in the classifier's fixed map, the Microsoft
-Store's `ProductKind` Game, Steam's type game with no software genre, every Switch title); or a review whose
-evidence record passes the rule below. Anything else (an AI answer, a match by name, a Store application, Steam
-software) is `suggested`. A `detail` shows on a confirmed entry only when an override or a passing review gave
-it; on a suggested entry it shows as suggested. Glint and Hearth never let a suggested value loosen a limit.
+`app:<slug>`; a key's beats its app's); a store rule (Play's genre in the classifier's fixed map, for the category
+that map gives; the Microsoft Store's `ProductKind` Game, Steam's type game with no software genre and every Switch
+title, each for `game` only); or a review whose evidence record passes the rule below. Anything else (an AI answer,
+a match by name, a Store application, Steam software) is `suggested`. A `detail` shows on a confirmed entry only
+when an override or a passing review gave it; on a suggested entry it shows as suggested. Glint and Hearth never
+let a suggested value loosen a limit.
+
+**Loose values.** A detail of `education`, `companion` or `system`, and the categories `messaging` (Hearth counts
+chat outside screen time) and `accessibility` (Hearth never pauses it), can lift a limit. No store rule confirms
+them: only an override or a passing review. Play's Communication genre holds web browsers and hearing tools as
+well as messengers, so a messenger the classifier filed from it stays suggested until one of those confirms it.
 
 **The evidence rule** (`catalog/evidence/<id>.json`, `glint.catalog-evidence/1`, written by the intake's reviewer
 agent). A record confirms its key's proposed category and detail only when its verdict is `approve`, two judges

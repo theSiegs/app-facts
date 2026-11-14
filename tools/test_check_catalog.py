@@ -142,6 +142,34 @@ class StateTest(unittest.TestCase):
         self.assertEqual(e["state"], "confirmed")
         self.assertNotIn("detail", e)
 
+    def test_play_rule_confirms_only_the_category_the_genre_gives(self):
+        t = Tree()
+        t.categories["com.example.news"] = {"category": "audio", "name": "Example Casts", "source": "play:NEWS_AND_MAGAZINES", "checked": DAY}
+        t.categories["com.example.edu"] = {"category": "productivity", "name": "Example ABC", "source": "play:EDUCATION", "checked": DAY}
+        s = t.shards()["android"]
+        self.assertEqual((s["android:com.example.news"]["state"], s["android:com.example.news"]["source"]), ("suggested", "play"))
+        self.assertEqual(s["android:com.example.edu"]["state"], "suggested")
+
+    def test_loose_categories_need_an_override_or_a_review(self):
+        t = Tree()
+        for pkg, cat in (("com.example.chat", "messaging"), ("com.example.sms", "messaging"), ("com.example.reader", "accessibility")):
+            t.categories[pkg] = {"category": cat, "name": "Example Messenger", "source": "play:COMMUNICATION", "checked": DAY}
+        t.categories["com.example.tools"] = {"category": "accessibility", "name": "Example Reader", "source": "play:TOOLS", "checked": DAY}
+        t.android_overrides["com.example.sms"] = "messaging"
+        t.keys["xbox:7654321"] = {"app": "example-hub", "category": "messaging", "source": "store:Game", "checked": DAY}
+        t.keys["msstore:9XXXXXXXXXX2"] = {"app": "example-hub", "category": "messaging", "source": "store:Application",
+                                          "checked": DAY, "review": f"{DAY}-msstore-9XXXXXXXXXX2"}
+        t.evidence.append(evidence(key="msstore:9XXXXXXXXXX2", proposed={"category": "messaging", "detail": None}))
+        s = t.shards()
+        state = lambda k: (s[k.split(":")[0]][k]["state"], s[k.split(":")[0]][k]["source"])  # noqa: E731
+        self.assertEqual(state("android:com.example.chat"), ("suggested", "play"))
+        self.assertEqual(state("android:com.example.reader"), ("suggested", "play"))
+        self.assertEqual(state("android:com.example.tools"), ("suggested", "play"))
+        self.assertEqual(state("android:com.example.sms"), ("confirmed", "override"))
+        self.assertEqual(state("xbox:7654321")[0], "suggested")  # a store rule confirms only a game
+        self.assertEqual(state("msstore:9XXXXXXXXXX2"), ("confirmed", "review"))
+        self.assertEqual(state("android:com.example.game"), ("confirmed", "play"))
+
     def test_suggested_entry_shows_its_detail(self):
         t = Tree()
         t.categories["com.example.tube"]["detail"] = "youtube"
