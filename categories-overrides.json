@@ -77,7 +77,7 @@
     "com.microsoft.copilot": {"kind": "assistant"},
     "com.microsoft.emmx": {"category": "unknown"},
     "com.microsoft.familysafety": {"category": "productivity"},
-    "com.microsoft.xboxone.smartglass": {"app": "xbox-app"},
+    "com.microsoft.xboxone.smartglass": {"app": "xbox"},
     "com.mojang.minecraftpe": {"app": "minecraft"},
     "com.mubi": {"category": "video", "detail": "streaming"},
     "com.nbaimd.gametime.nba2011": {"category": "news"},
