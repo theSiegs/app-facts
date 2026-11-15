@@ -1,0 +1,56 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.projection.gearhead",
+  "source": "synthetic",
+  "scrubbed": true,
+  "label": "Android Auto",
+  "notes": "Synthetic: 3 scrubbed notification shapes, scrubbed again and re-timed by the tile exchange's drafting job.",
+  "samples": [
+    {
+      "name": "shape 1",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "gearhead_connection_status",
+        "category": "service",
+        "ongoing": true,
+        "importance": 2,
+        "title": "Connecting to Android Auto",
+        "indeterminate": true
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-projection-gearhead"
+      }
+    },
+    {
+      "name": "shape 2",
+      "notification": {
+        "posted": 1700007200000,
+        "when": 1700007200000,
+        "channel": "gearhead_xxxxxx",
+        "importance": 4,
+        "title": "Android Auto is available",
+        "text": "Select it on your vehicle screen to start"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-projection-gearhead"
+      }
+    },
+    {
+      "name": "shape 3",
+      "notification": {
+        "posted": 1700061200000,
+        "when": 1700061200000,
+        "channel": "gearhead_connection_status",
+        "category": "status",
+        "ongoing": true,
+        "importance": 2,
+        "title": "Android Auto is available",
+        "text": "Continue on your vehicle screen"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-projection-gearhead"
+      }
+    }
+  ]
+}
