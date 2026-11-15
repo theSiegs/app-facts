@@ -6,7 +6,8 @@
 categories.json (written by the intake's nightly classifier) and categories-overrides.json (written by
 hand; it always wins) must pass:
   - schema: their format, an "apps" object, and per app only the known keys with the right types
-  - categories in the allowed set (catalog/values.json, tools/values.py; or "unknown")
+  - categories in the allowed set (catalog/values.json, tools/values.py; or "unknown"); one the table marks
+    overrides_only (interface) only in categories-overrides.json, never in the classifier's categories.json
   - a glance, when there is one, in the allowed set (which of Glint's glances an app's tile borrows)
   - a kind, when there is one, in the allowed set (what Glint's kind recipes and Car tile key on)
   - package names in Android's format
@@ -29,6 +30,9 @@ OVERRIDES_FORMAT = "glint.categories-overrides/1"
 # The categories: the values table's (catalog/values.json), Hearth HA's APP_CATEGORIES plus messaging
 CATEGORIES = values.TABLE.categories
 UNKNOWN = values.UNKNOWN
+# Categories only an override may set (interface: System UI, launchers, Android's own screens; counted nowhere,
+# so a mis-tagged game would be free time): never the classifier's categories.json
+OVERRIDES_ONLY = values.TABLE.overrides_only_categories
 # Which of Glint's glances an app's tile borrows when it has nothing waiting: Glint's own photos, music,
 # calendar, clock and weather glances; "car", reserved for a car glance Glint doesn't have yet (Glint
 # falls back to its own guess); "calls", a calling app (Google Voice and the like) whose voicemails,
@@ -41,7 +45,8 @@ GLANCES = ("photos", "music", "calendar", "clock", "weather", "car", "calls", "n
 # or bot app (Claude, ChatGPT, Gemini) whose chat-style replies are never a person writing (2026-11-11).
 KINDS = ("car", "charging", "airline", "delivery", "ride", "assistant")
 CAP = 60
-PACKAGE = re.compile(r"^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$")
+# Android's own package is "android" (the framework's screens), the one package name without a dot
+PACKAGE = re.compile(r"^(android|[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+)$")
 SOURCE = re.compile(r"^(play|ai|ai-search)(:[A-Z0-9_]{1,40})?$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 NAME_MAX = 60
@@ -104,6 +109,8 @@ def check_categories(data):
             raise Bad(f"{where}: an entry is an object with only {sorted(ENTRY_KEYS)}")
         if e.get("category") not in CATEGORIES + (UNKNOWN,):
             raise Bad(f"{where}: category {e.get('category')!r} is not one of {CATEGORIES + (UNKNOWN,)}")
+        if e["category"] in OVERRIDES_ONLY:
+            raise Bad(f"{where}: category {e['category']!r} is set only by an override (categories-overrides.json)")
         if not isinstance(e.get("source"), str) or not SOURCE.match(e["source"]):
             raise Bad(f"{where}: source {e.get('source')!r} is not play[:GENRE], ai[:GENRE] or ai-search")
         if not isinstance(e.get("checked"), str) or not DATE.match(e["checked"]):
