@@ -1,0 +1,63 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "learned-com-google-android-googlequicksearchbox",
+  "rev": 1,
+  "name": "google",
+  "app": {
+    "package": "com.google.android.googlequicksearchbox",
+    "label": "Google"
+  },
+  "meta": {
+    "status": "learned",
+    "author": "Glint",
+    "notes": "Learned from 30 notification shapes over 2 days.",
+    "updated": "2026-11-15"
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "channels": [
+          "99"
+        ],
+        "notCategories": [
+          "alarm",
+          "call",
+          "msg",
+          "promo",
+          "recommendation",
+          "sys",
+          "transport"
+        ],
+        "anchors": [
+          "(?i)\\b(?:full|see)\\b"
+        ],
+        "lang": [
+          "en"
+        ]
+      }
+    }
+  },
+  "faces": [
+    {
+      "title": "{title}",
+      "line": "{text}",
+      "peek": "{time}"
+    },
+    {
+      "title": "{title}",
+      "peek": "{time}",
+      "when": [
+        "!text"
+      ]
+    },
+    {
+      "kind": "count",
+      "count": "{count}",
+      "label": "new",
+      "when": [
+        "count>1"
+      ],
+      "flip": true
+    }
+  ]
+}
