@@ -1,0 +1,106 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.googlequicksearchbox",
+  "source": "synthetic",
+  "scrubbed": true,
+  "label": "Google",
+  "notes": "Synthetic: 6 scrubbed notification shapes, scrubbed again and re-timed by the tile exchange's drafting job.",
+  "samples": [
+    {
+      "name": "shape 1",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "99",
+        "importance": 1,
+        "template": "BigTextStyle",
+        "title": "99° in Xxxxxxxxxxxx",
+        "text": "Clear with xxxxxxxx xxxxxx · See full xxxxxxxx",
+        "bigText": "Clear with xxxxxxxx xxxxxx · See full xxxxxxxx"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-googlequicksearchbox"
+      }
+    },
+    {
+      "name": "shape 2",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "99",
+        "importance": 1,
+        "template": "BigTextStyle",
+        "title": "99° in Xxxxxxxxxxxx",
+        "text": "Xxxxxx xxxxxx · See full xxxxxxxx",
+        "bigText": "Xxxxxx xxxxxx · See full xxxxxxxx"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-googlequicksearchbox"
+      }
+    },
+    {
+      "name": "shape 3",
+      "notification": {
+        "posted": 1700003600000,
+        "when": 1700003600000,
+        "channel": "99",
+        "importance": 1,
+        "template": "BigTextStyle",
+        "title": "99° in Xxxxxxxxxxxx",
+        "text": "Clear · See full xxxxxxxx",
+        "bigText": "Clear · See full xxxxxxxx"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-googlequicksearchbox"
+      }
+    },
+    {
+      "name": "shape 4",
+      "notification": {
+        "posted": 1700003600000,
+        "when": 1700003600000,
+        "channel": "99",
+        "importance": 1,
+        "template": "BigTextStyle",
+        "title": "99° in Xxxxxxxxxxxx",
+        "text": "Xxxxx like 99° · Clear · See full xxxxxxxx",
+        "bigText": "Xxxxx like 99° · Clear · See full xxxxxxxx"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-googlequicksearchbox"
+      }
+    },
+    {
+      "name": "shape 5",
+      "notification": {
+        "posted": 1700007200000,
+        "when": 1700007200000,
+        "channel": "99",
+        "importance": 1,
+        "template": "BigTextStyle",
+        "title": "99° in Xxxxxxxxxxxx",
+        "text": "Xxxxx like 99° · Clear with xxxxxxxx xxxxxx · See full xxxxxxxx",
+        "bigText": "Xxxxx like 99° · Clear with xxxxxxxx xxxxxx · See full xxxxxxxx"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-googlequicksearchbox"
+      }
+    },
+    {
+      "name": "shape 6",
+      "notification": {
+        "posted": 1700018000000,
+        "when": 1700018000000,
+        "channel": "99",
+        "importance": 2,
+        "template": "BigTextStyle",
+        "title": "Xxxxxx afternoon",
+        "text": "99° / 99° · See full xxxxxxxx for Xxxxxxxxxxxx",
+        "bigText": "99° / 99° · See full xxxxxxxx for Xxxxxxxxxxxx"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-googlequicksearchbox"
+      }
+    }
+  ]
+}
