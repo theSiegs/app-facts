@@ -10,7 +10,8 @@
     "maps": {"label": "Maps", "pool": "other"},
     "productivity": {"label": "Productivity", "pool": "other"},
     "accessibility": {"label": "Accessibility", "pool": "other", "loose": true},
-    "messaging": {"label": "Messaging", "pool": "messaging", "outside_all": true, "loose": true}
+    "messaging": {"label": "Messaging", "pool": "messaging", "outside_all": true, "loose": true},
+    "interface": {"label": "System screens", "counted": false, "overrides_only": true}
   },
   "details": {
     "youtube": {"label": "YouTube", "parents": ["video"], "pool": "other", "pool_names": ["youtube"]},

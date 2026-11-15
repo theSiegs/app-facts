@@ -44,6 +44,14 @@ class CheckTest(unittest.TestCase):
         self.bad(doc({"com.example.a": e("shopping")}))
         self.bad(doc({"not a package": e("game")}))
         self.bad(doc({"example": e("game")}))
+        cc.check_package("x", "android")  # Android's own package, the one without a dot
+
+    def test_overrides_only_category_is_never_the_classifiers(self):
+        self.assertIn("interface", cc.OVERRIDES_ONLY)
+        self.bad(doc({"com.example.launcher": e("interface")}))
+        o = cc.check_overrides({"format": cc.OVERRIDES_FORMAT, "apps": {"android": {"category": "interface"},
+                                                                         "com.example.launcher": "interface"}})
+        self.assertEqual(cc.merged({}, o)["android"], {"category": "interface"})
 
     def test_no_personal_data_in_names(self):
         for name in ["Write to a@b.co", "Booking.com", "https://x", "Call 555 123 4567", "two\nlines", "x" * 61]:

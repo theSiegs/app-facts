@@ -170,6 +170,29 @@ class StateTest(unittest.TestCase):
         self.assertEqual(state("msstore:9XXXXXXXXXX2"), ("confirmed", "review"))
         self.assertEqual(state("android:com.example.game"), ("confirmed", "play"))
 
+    def test_overrides_only_needs_an_override(self):
+        t = Tree()
+        t.android_overrides["com.example.launcher"] = {"category": "interface"}
+        t.android_overrides["android"] = "interface"
+        s = t.shards()["android"]
+        self.assertEqual((s["android:com.example.launcher"]["category"], s["android:com.example.launcher"]["state"],
+                          s["android:com.example.launcher"]["source"]), ("interface", "confirmed", "override"))
+        self.assertEqual(s["android:android"]["category"], "interface")
+        t.overrides["app:example-hub"] = {"category": "interface"}
+        self.assertEqual(t.shards()["xbox"]["xbox:1234567"]["source"], "override")
+        # the classifier may not write it, in categories.json or keys.json
+        t = Tree()
+        t.categories["com.example.launcher"] = {"category": "interface", "source": "ai", "checked": DAY}
+        with self.assertRaises(ck.Bad):
+            t.shards()
+        t = Tree()
+        t.keys["xbox:7654321"] = {"app": "example-hub", "category": "interface", "source": "ai", "checked": DAY}
+        with self.assertRaises(ck.Bad):
+            t.shards()
+        # and whatever reaches publishing without an override is left out
+        out = ck._resolve("xbox:7654321", {"app": "example-hub", "category": "interface", "source": "ai"}, {}, None, {})
+        self.assertEqual(out, {"app": "example-hub"})
+
     def test_suggested_entry_shows_its_detail(self):
         t = Tree()
         t.categories["com.example.tube"]["detail"] = "youtube"
@@ -233,6 +256,12 @@ class EvidenceTest(unittest.TestCase):
     def test_game_signals_block_leaving_game(self):
         rec = evidence(proposed={"category": "video", "detail": None}, signals=["play:GAME_ARCADE"])
         self.assertEqual(self.reviewed(rec, ("video", None))["state"], "suggested")
+
+    def test_review_never_confirms_overrides_only(self):
+        rec = evidence(proposed={"category": "interface", "detail": None})
+        ok, why = ck.evidence_passes(rec, "xbox:1234567", "interface", None)
+        self.assertFalse(ok)
+        self.assertIn("override", why)
 
     def test_not_approved(self):
         self.assert_suggested(evidence(verdict="escalate"))

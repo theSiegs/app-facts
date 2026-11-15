@@ -53,6 +53,9 @@ LOOSE = values.TABLE.loose_details
 # time, accessibility is never paused): a move into one loosens a limit, so like a LOOSE detail it is confirmed
 # only by an override or a passing review, never by a store rule.
 LOOSE_CATEGORIES = values.TABLE.loose_categories
+# Values only an override may set (interface: counted nowhere and never paused, so a mis-tagged game would be
+# free time): never the classifier's keys.json, a store rule or a review; an entry gets one only by override.
+OVERRIDES_ONLY = values.TABLE.overrides_only
 CAP = cc.CAP
 
 SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{1,39}$")
@@ -195,6 +198,9 @@ def check_keys(data, apps):
         if "category" in e and e["category"] not in CATEGORIES + (UNKNOWN,):
             raise Bad(f"{where}: category {e['category']!r} is not one of {CATEGORIES + (UNKNOWN,)}")
         check_detail(where, e.get("category"), e.get("detail"))
+        for k in ("category", "detail"):
+            if e.get(k) in OVERRIDES_ONLY:
+                raise Bad(f"{where}: {k} {e[k]!r} is set only by an override (catalog/overrides.json)")
         if not isinstance(e.get("source"), str) or not KEY_SOURCE.match(e["source"]):
             raise Bad(f"{where}: source {e.get('source')!r} is not a known tag")
         if not isinstance(e.get("checked"), str) or not cc.DATE.match(e["checked"]):
@@ -297,6 +303,8 @@ def evidence_passes(rec, key, category, detail):
         return False, "no evidence record"
     if rec["verdict"] != "approve":
         return False, f"verdict is {rec['verdict']}"
+    if category in OVERRIDES_ONLY or detail in OVERRIDES_ONLY:
+        return False, "only an override sets that value"
     want = {"category": None if category in (None, UNKNOWN) else category, "detail": detail}
     def norm(a):
         a = _answer("", a)
@@ -394,6 +402,16 @@ def _resolve(key, entry, overrides, app_override, evidence):
             out["checked"] = e["checked"]
         return out or None
     by_override = ("category" in over or "detail" in over)
+    # An overrides-only value (interface) that no override gave is never published (the checks refuse it in the
+    # sources; this keeps it out whatever reaches here)
+    if category in OVERRIDES_ONLY and "category" not in over:
+        category = None
+    if detail in OVERRIDES_ONLY and "detail" not in over:
+        detail = None
+    if category is None and detail is None:
+        if "checked" in e:
+            out["checked"] = e["checked"]
+        return out or None
     reviewed = review is not None and evidence_passes(evidence.get(review), key, category, detail)[0]
     if by_override:
         state, source = "confirmed", "override"

@@ -24,10 +24,16 @@ class TableTest(unittest.TestCase):
     def test_repo_table(self):
         t = values.TABLE
         self.assertEqual(t.categories, ("game", "video", "audio", "image", "social", "news", "maps", "productivity",
-                                        "accessibility", "messaging"))
+                                        "accessibility", "messaging", "interface"))
         self.assertEqual(t.details, ("youtube", "streaming", "education", "companion", "system", "browser"))
         self.assertEqual(t.loose_categories, ("accessibility", "messaging"))
         self.assertEqual(t.loose_details, ("education", "companion", "system"))
+        self.assertEqual(t.overrides_only, ("interface",))
+        self.assertEqual(t.overrides_only_categories, ("interface",))
+        self.assertEqual(t.uncounted, ("interface",))
+        self.assertEqual(t.label("interface"), "System screens")
+        self.assertNotIn("pool", t.data["categories"]["interface"])
+        self.assertNotIn("interface", t.loose_categories)
         self.assertEqual(t.detail_categories["browser"], (None,))
         self.assertEqual(t.label("browser"), "Web browsers")
         self.assertIsNone(t.label("unknown"))
@@ -38,6 +44,8 @@ class TableTest(unittest.TestCase):
         self.assertEqual(ck.DETAIL_CATEGORIES, values.TABLE.detail_categories)
         self.assertEqual(ck.LOOSE, values.TABLE.loose_details)
         self.assertEqual(ck.LOOSE_CATEGORIES, values.TABLE.loose_categories)
+        self.assertEqual(ck.OVERRIDES_ONLY, values.TABLE.overrides_only)
+        self.assertEqual(cc.OVERRIDES_ONLY, values.TABLE.overrides_only_categories)
 
     def test_browser_detail_has_no_category(self):
         ck.check_detail("x", None, "browser")
@@ -67,6 +75,15 @@ class TableTest(unittest.TestCase):
             broken(lambda d: d["details"]["browser"].update(parents=[])),
             broken(lambda d: d["details"]["browser"].update(outside_all=True)),
             broken(lambda d: d["details"].update(game={"label": "G", "parents": [None], "pool": "other"})),
+            broken(lambda d: d["categories"]["game"].pop("pool")),  # pool required unless counted is false
+            broken(lambda d: d["categories"]["game"].update(counted=True)),
+            broken(lambda d: d["categories"]["game"].update(counted="no")),
+            broken(lambda d: d["categories"]["interface"].update(pool="other")),
+            broken(lambda d: d["categories"]["interface"].update(pool_names=["system"])),
+            broken(lambda d: d["categories"]["interface"].update(outside_all=True)),
+            broken(lambda d: d["categories"]["interface"].update(overrides_only=False)),
+            broken(lambda d: d["categories"]["interface"].update(loose=True)),
+            broken(lambda d: d["categories"]["messaging"].update(overrides_only=True)),  # loose and overrides_only
         ):
             with self.assertRaises(values.Bad):
                 values.check(d)
@@ -89,12 +106,17 @@ class AddOnlyTest(unittest.TestCase):
         ck.values_only_added(self.base, self.head(lambda d: d["details"].update(
             reading={"label": "Reading", "parents": ["productivity", None], "pool": "other"})))
         ck.values_only_added(self.base, self.head(lambda d: d["categories"]["news"].update(label="News and magazines")))
+        ck.values_only_added(self.base, self.head(lambda d: d["details"].update(
+            keyboard={"label": "Keyboards", "parents": ["interface"], "counted": False, "overrides_only": True})))
 
     def test_removing_or_renaming_is_refused(self):
         for f in (lambda d: d["details"].pop("browser"),
                   lambda d: d["details"].update(web=d["details"].pop("browser")),
                   lambda d: d["categories"].pop("maps"),
-                  lambda d: d["categories"]["messaging"].pop("loose")):
+                  lambda d: d["categories"]["messaging"].pop("loose"),
+                  lambda d: d["categories"]["interface"].pop("overrides_only"),
+                  lambda d: d["categories"].update(interface={"label": "System screens", "pool": "other",
+                                                              "overrides_only": True})):  # becomes counted
             with self.assertRaises(ck.Bad):
                 ck.values_only_added(self.base, self.head(f))
 

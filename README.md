@@ -101,7 +101,9 @@ the scrubber's common-word list (`checker/src/main/resources/glint/common-words.
 
 `categories.json` says what kind of app a package is: `game`, `video`, `audio`, `image`, `social`,
 `news`, `maps`, `productivity`, `accessibility` or `messaging` (Hearth HA's app categories; the values
-table, below, lists them), or `unknown`. Glint uses it for an app's glyph when nothing else says what the app is, and passes it to
+table, below, lists them), `interface` (not an app: System UI, launchers, Android's own screens, setup
+wizards, permission controllers, package installers, keyboards, Family Link's lock and downtime screens;
+only ever set by an override, see "Values"), or `unknown`. Glint uses it for an app's glyph when nothing else says what the app is, and passes it to
 Hearth HA's screen time as `catalog_categories` (Hearth prefers the category the app declares itself).
 
 ```json
@@ -234,7 +236,7 @@ edition" or " edition" removed; every run of other characters than a-z and 0-9 b
 
 | Field | Values |
 |---|---|
-| `category` | The ten above, from the values table (below). Add-only; a new one only when Android adds a category, or for a need as basic as messaging. Older Glint and Hearth drop a value they don't know (Other in Hearth: never looser). |
+| `category` | The eleven above, from the values table (below). Add-only; a new one only when Android adds a category, or for a need as basic as messaging. Older Glint and Hearth drop a value they don't know (Other in Hearth: never looser). |
 | `detail` | `youtube`, `streaming` (both under `video`), `education`, `companion`, `system` (under `productivity` or no category), `browser` (web browsers; no category). From the values table, add-only. Educational games are `game` with no detail. |
 | `app`, `name` | The slug and the app's title. |
 | `state` | `confirmed` or `suggested`, **computed when publishing, never written in a source file**. |
@@ -253,6 +255,13 @@ let a suggested value loosen a limit.
 chat outside screen time) and `accessibility` (Hearth never pauses it), can lift a limit. No store rule confirms
 them: only an override or a passing review. Play's Communication genre holds web browsers and hearing tools as
 well as messengers, so a messenger the classifier filed from it stays suggested until one of those confirms it.
+
+**Overrides-only values.** The values the table marks `overrides_only` (the category `interface`: System UI,
+launchers, Android's own screens, keyboards; counted nowhere and never held or paused) are set only by an
+override (`categories-overrides.json`, `catalog/overrides.json`) or a device's built-in list. The classifier may
+not write one (the check refuses it in `categories.json` and `catalog/keys.json`), no store rule or review
+confirms one, and the intake's classifier, reviewer and relay never offer one. A game filed there by mistake would
+be free time, so nothing automatic can put it there.
 
 **The evidence rule** (`catalog/evidence/<id>.json`, `glint.catalog-evidence/1`, written by the intake's reviewer
 agent). A record confirms its key's proposed category and detail only when its verdict is `approve`, two judges
@@ -281,12 +290,15 @@ intake's classifier and reviewer, and the relay all read it; nobody keeps a copy
 Each value has a short `label` and Hearth's default `pool` (`games`, `social`, `messaging` or `other`), and may
 have `pool_names` (a household's own pool of that name takes it, else `pool`), `loose` (it can lift a limit, so
 only an override or a passing review confirms it) and `outside_all` (Hearth counts it outside All screen time).
+A value with `"counted": false` is counted nowhere and never held or paused, so it has no `pool`, `pool_names` or
+`outside_all`; one with `"overrides_only": true` is set only by an override (above), never with `loose`.
 A detail also has `parents`, the categories it may sit under (`null`: no category). `tools/values.py` checks it.
 The build publishes it as `c/<hash>.json` and names it in the signed index as `values` (path, SHA-256 and count),
 so readers get labels for new values without a release.
 
 **How it grows: add-only, the owner decides, one step.**
-1. Values are only added. None is removed or renamed in place, and none stops being loose:
+1. Values are only added. None is removed or renamed in place, none stops being loose or overrides-only, and
+   none uncounted becomes counted:
    `tools/check_catalog.py --base` refuses that against the base. A needed rename is a one-step migration
    (overrides first, then the Glint and Hearth releases).
 2. The owner decides each new value, never the classifier, the reviewer or a model. A pull request that changes
