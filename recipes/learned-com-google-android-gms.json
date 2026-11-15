@@ -1,0 +1,59 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "learned-com-google-android-gms",
+  "rev": 1,
+  "name": "google play services",
+  "app": {
+    "package": "com.google.android.gms",
+    "label": "Google Play services"
+  },
+  "meta": {
+    "status": "learned",
+    "author": "Glint",
+    "notes": "Learned from 26 notification shapes over 9 days.",
+    "updated": "2026-11-15"
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "channels": [
+          "com.google.android.gms.notifications::SECURITY_XXXXXX",
+          "com.google.android.gms.notifications::SIGN_IN_XXXXXXX",
+          "com.google.android.gms.people.sync.xxxxx.notification.xxx9_channel.xx9"
+        ],
+        "notCategories": [
+          "alarm",
+          "call",
+          "msg",
+          "promo",
+          "recommendation",
+          "sys",
+          "transport"
+        ]
+      }
+    }
+  },
+  "faces": [
+    {
+      "title": "{title}",
+      "line": "{text}",
+      "peek": "{time}"
+    },
+    {
+      "title": "{title}",
+      "peek": "{time}",
+      "when": [
+        "!text"
+      ]
+    },
+    {
+      "kind": "count",
+      "count": "{count}",
+      "label": "new",
+      "when": [
+        "count>1"
+      ],
+      "flip": true
+    }
+  ]
+}

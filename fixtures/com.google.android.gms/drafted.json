@@ -1,0 +1,144 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.gms",
+  "source": "synthetic",
+  "scrubbed": true,
+  "label": "Google Play services",
+  "notes": "Synthetic: 8 scrubbed notification shapes, scrubbed again and re-timed by the tile exchange's drafting job.",
+  "samples": [
+    {
+      "name": "shape 1",
+      "notification": {
+        "posted": 1700064800000,
+        "when": 1700064800000,
+        "channel": "com.google.android.gms.people.sync.xxxxx.notification.xxx9_channel.xx9",
+        "ongoing": true,
+        "importance": 2,
+        "title": "Google Xxxxxxxx xxxxxxx up 9 of 9 contact",
+        "subText": "alex@example.com",
+        "progress": 100,
+        "max": 100
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-gms"
+      }
+    },
+    {
+      "name": "shape 2",
+      "notification": {
+        "posted": 1700104400000,
+        "when": 1700104400000,
+        "channel": "com.google.android.gms.people.sync.xxxxx.notification.xxx9_channel.xx9",
+        "ongoing": true,
+        "importance": 2,
+        "title": "Google Xxxxxxxx xxxxxxx up 9 of 9 contact photo",
+        "subText": "alex@example.com",
+        "progress": 100,
+        "max": 100
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-gms"
+      }
+    },
+    {
+      "name": "shape 3",
+      "notification": {
+        "posted": 1700183600000,
+        "when": 1700183600000,
+        "channel": "com.google.android.gms.notifications::SIGN_IN_XXXXXXX",
+        "importance": 4,
+        "template": "BigTextStyle",
+        "title": "Confirm whether it's you trying to sign in",
+        "text": "alex@example.com",
+        "bigText": "alex@example.com",
+        "subText": "alex@example.com"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-gms"
+      }
+    },
+    {
+      "name": "shape 4",
+      "notification": {
+        "posted": 1700190800000,
+        "when": 1700190800000,
+        "channel": "com.google.android.gms.people.sync.xxxxx.notification.xxx9_channel.xx9",
+        "ongoing": true,
+        "importance": 2,
+        "title": "Google Contacts xxxxxxx up 9 of 9 contact",
+        "subText": "alex@example.com",
+        "progress": 100,
+        "max": 100
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-gms"
+      }
+    },
+    {
+      "name": "shape 5",
+      "notification": {
+        "posted": 1700234000000,
+        "when": 1700234000000,
+        "channel": "com.google.android.gms.people.sync.xxxxx.notification.xxx9_channel.xx9",
+        "ongoing": true,
+        "importance": 2,
+        "title": "Google Contacts xxxxxxx up 9 of 9 contact photo",
+        "subText": "alex@example.com",
+        "progress": 100,
+        "max": 100
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-gms"
+      }
+    },
+    {
+      "name": "shape 6",
+      "notification": {
+        "posted": 1700295200000,
+        "when": 1700295200000,
+        "channel": "com.google.android.gms.people.sync.xxxxx.notification.xxx9_channel.xx9",
+        "ongoing": true,
+        "importance": 2,
+        "title": "Google Contacts xxxxxxx up 9 of 9 contact photos",
+        "subText": "alex@example.com",
+        "progress": 50,
+        "max": 100
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-gms"
+      }
+    },
+    {
+      "name": "left alone 1",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "xxx_active_share_reminders",
+        "importance": 2,
+        "title": "Xxxxxx still sharing your location",
+        "text": "You can manage the people you share your location with in settings",
+        "subText": "alex@example.com"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-gms",
+        "match": false
+      }
+    },
+    {
+      "name": "left alone 2",
+      "notification": {
+        "posted": 1700345600000,
+        "when": 1700345600000,
+        "channel": "xxxxxxxxxxx_xxxxxxxxxx_channel_xx",
+        "ongoing": true,
+        "importance": 2,
+        "title": "Device setup in progress",
+        "text": "Tap to resume"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-gms",
+        "match": false
+      }
+    }
+  ]
+}
