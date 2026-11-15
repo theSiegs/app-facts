@@ -1,0 +1,49 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-15-android-com-google-android-videos",
+ "key": "android:com.google.android.videos",
+ "previous": {
+  "category": "video",
+  "detail": "streaming"
+ },
+ "proposed": {
+  "category": "video",
+  "detail": "streaming"
+ },
+ "verdict": "approve",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.google.android.videos",
+   "says": "Google Play genre VIDEO_PLAYERS; title Google TV; summary: Easily discover, watch, and stream your favorite movies and shows in one place"
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Google_TV",
+   "says": "Google TV may refer to:Google TV (interface), an updated Android TV interface launched in 2020 Google TV Streamer, a streaming device powered by the interface Google TV (service), a digital distribution service succeeding Google Play Movies & TV Google TV (2010–2014), a discontinued operating system"
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/5",
+   "answer": {
+    "category": "video",
+    "detail": "streaming"
+   },
+   "reason": "The app is a digital distribution and streaming service for discovering and watching movies and shows."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/5",
+   "answer": {
+    "category": "video",
+    "detail": "streaming"
+   },
+   "reason": "Google TV is a digital distribution and streaming service for movies and shows."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-15"
+}
