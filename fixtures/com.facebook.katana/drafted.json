@@ -19,7 +19,8 @@
         "summaryText": "💬 You have 9 messages and 9 new notifications."
       },
       "expect": {
-        "recipe": "learned-com-facebook-katana"
+        "recipe": "learned-com-facebook-katana",
+        "kind": "count"
       }
     },
     {
@@ -35,7 +36,8 @@
         "bigText": "You have 9 messages and 9 new notifications."
       },
       "expect": {
-        "recipe": "learned-com-facebook-katana"
+        "recipe": "learned-com-facebook-katana",
+        "kind": "count"
       }
     },
     {
@@ -51,7 +53,8 @@
         "bigText": "💬 You have 9 messages and 9 new notifications."
       },
       "expect": {
-        "recipe": "learned-com-facebook-katana"
+        "recipe": "learned-com-facebook-katana",
+        "kind": "count"
       }
     },
     {
@@ -67,7 +70,8 @@
         "summaryText": "💬 You have 9 messages, 999 photos and 9 other updates from Xxxxxxx /Xxxxxxxxx Xxxxxx History, If you were from Xxxxxxxxxxxx, you would remember... and others."
       },
       "expect": {
-        "recipe": "learned-com-facebook-katana"
+        "recipe": "learned-com-facebook-katana",
+        "kind": "count"
       }
     },
     {
@@ -83,7 +87,8 @@
         "bigText": "💬 You have 9 group update, 9 messages and 9 new notification."
       },
       "expect": {
-        "recipe": "learned-com-facebook-katana"
+        "recipe": "learned-com-facebook-katana",
+        "kind": "count"
       }
     },
     {
@@ -99,7 +104,8 @@
         "bigText": "💬 You have 9 messages and 9 new notification."
       },
       "expect": {
-        "recipe": "learned-com-facebook-katana"
+        "recipe": "learned-com-facebook-katana",
+        "kind": "count"
       }
     },
     {

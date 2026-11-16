@@ -10,7 +10,7 @@
   "meta": {
     "status": "learned",
     "author": "Glint",
-    "notes": "Learned from 10 notification shapes over 5 days.",
+    "notes": "Learned from 10 notification shapes over 5 days. Reviewed: counts only, off by default (the spec's plan for Facebook); the digest's title is the account's own name, so it isn't drawn.",
     "updated": "2026-11-14"
   },
   "source": {
@@ -39,25 +39,40 @@
   },
   "faces": [
     {
-      "title": "{title}",
-      "line": "{text}",
-      "peek": "{time}"
-    },
-    {
-      "title": "{title}",
-      "peek": "{time}",
-      "when": [
-        "!text"
-      ]
+      "kind": "count",
+      "count": "{news}",
+      "label": "new",
+      "peek": "{posted|ago}"
     },
     {
       "kind": "count",
-      "count": "{count}",
-      "label": "new",
+      "count": "{msgs}",
+      "label": "messages",
+      "peek": "{posted|ago}",
       "when": [
-        "count>1"
-      ],
-      "flip": true
+        "!news"
+      ]
     }
-  ]
+  ],
+  "enabled": false,
+  "fields": {
+    "news": {
+      "from": [
+        "text"
+      ],
+      "regex": "(?i)\\b(?P<v>\\d{1,4}) new notifications?\\b",
+      "lang": [
+        "en"
+      ]
+    },
+    "msgs": {
+      "from": [
+        "text"
+      ],
+      "regex": "(?i)\\b(?P<v>\\d{1,4}) messages?\\b",
+      "lang": [
+        "en"
+      ]
+    }
+  }
 }
