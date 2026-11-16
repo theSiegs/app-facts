@@ -1,4 +1,4 @@
-# Signed publishing (README.md, "How a recipe gets in"): checks the catalog, builds site/ per the
+# Signed publishing (README.md): checks the catalog, builds site/ per the
 # glint.exchange/1 contract, signs index.json with EXCHANGE_SIGNING_KEY, verifies the signature
 # against the committed public key, uploads site/ as an artifact, and deploys it to GitHub Pages once
 # the repo is public. check.yml starts it on main after an auto-merge (a GITHUB_TOKEN push starts no push run).
@@ -40,15 +40,12 @@ jobs:
           ref: ${{ inputs.ref || github.sha }}
           persist-credentials: false
 
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
-        with:
-          distribution: temurin
-          java-version: "21"
-          cache: gradle
-          cache-dependency-path: checker/*.gradle.kts
-
       - name: Check the catalog
-        run: ./checker/gradlew -p checker check --no-daemon
+        run: |
+          python3 -m unittest discover -s tools
+          python3 tools/check_categories.py
+          python3 tools/check_hidden.py
+          python3 tools/check_catalog.py
 
       - name: Build, sign and verify the index
         env:

@@ -1,4 +1,19 @@
-# Recipes withdrawn from the tile exchange. One per line: a recipe id (every rev) or id@rev
-# (that rev only). Glint never uses a revoked recipe, even from its cache, and deletes the cached file.
-# Lines starting with # are comments.
-# Example lines: southwest-flight (every rev), amazon-delivery@1 (rev 1 only).
+# Recipe ids the catalog once published (recipes are no longer published, 2026-11-16). One per line: a
+# recipe id (every rev) or id@rev. Glint deletes a cached catalog copy of a revoked recipe; its own
+# built-in recipes are not affected. Lines starting with # are comments.
+amazon-delivery
+doordash-order
+gmail-new
+google-home-door
+keep-reminder
+learned-com-azure-authenticator
+learned-com-buswhere-schools
+learned-com-facebook-katana
+learned-com-google-android-apps-kids-familylink
+learned-com-google-android-apps-maps
+learned-com-google-android-apps-photos
+learned-com-google-android-calendar
+learned-com-google-android-googlequicksearchbox
+southwest-flight
+tasks-reminder
+youtube-new

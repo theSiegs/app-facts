@@ -1,112 +1,50 @@
-# App facts: the Glint tile exchange catalog
+# App Facts: shared app categories and values for Glint and Hearth
 
-This is the catalog behind Glint's **community live tile exchange**: small data files ("recipes")
-that tell the Glint launcher how to turn one app's notifications into a live tile (a delivery's
-status, a flight's gate, a count of new mail). Glint ships the ones for a few Google apps built in;
-with the tile exchange switched on, it fetches the rest from here.
+A small public, signed dataset of facts about apps: what kind of app each Android package is, keys for
+the same app on Xbox, Microsoft Store, Windows, Steam and Switch, the values table (each category and
+detail, with Hearth's default pool), the apps that are only system screens, and Glint's starter list of
+notifications it hides. The Glint launcher and Hearth (Home Assistant) read it.
+
+Tile recipes (the "tile exchange") are no longer published here (2026-11-16): the index's `apps` is
+empty, and `revoked.txt` lists every recipe id it once published so phones drop their cached copies.
 
 ## What's here
 
 | Path | What it is |
 |---|---|
-| `recipes/<id>.json` | One recipe per file, in the `glint.recipe/1` format (Glint's `recipes/SPEC.md`). |
-| `fixtures/<package>/*.json` | Synthetic or scrubbed sample notifications for one app, each with what its recipe should draw. |
 | `categories.json` | App categories: one line per Android package, written by the intake's nightly classifier (below). |
 | `categories-overrides.json` | Hand corrections to the categories; they always win. |
-| `catalog/` | The cross-platform app catalog: `keys.json` (Xbox, Microsoft Store, Windows, Steam, Switch and web keys), `apps.json` (app slugs), `overrides.json`, `evidence/` (the reviewer agent's records) and `normalize-vectors.json` (see "App catalog"). |
+| `catalog/` | The cross-platform app catalog: `keys.json` (Xbox, Microsoft Store, Windows, Steam, Switch and web keys), `apps.json` (app slugs), `overrides.json`, `values.json` (the values table), `evidence/` (the reviewer agent's records) and `normalize-vectors.json` (see "App catalog"). |
 | `hidden.json` | Glint's starter list of notifications it hides (see "Hidden notifications"). |
-| `revoked.txt` | Recipes withdrawn from the exchange: one `id` or `id@rev` per line. |
+| `revoked.txt` | Recipe ids withdrawn: one `id` or `id@rev` per line. |
 | `keys/exchange-1.pub`, `keys/exchange-2.pub` | The publishing public keys (base64 of the raw 32-byte Ed25519 key). |
-| `checker/` | A standalone copy of Glint's recipe checker and shape learner (Kotlin), with its own Gradle build. |
 | `tools/build_index.py` | Builds and signs the published site (Python, standard library only). |
 | `tools/check_categories.py` | Checks the two categories files and merges them for publishing (and `tools/test_check_categories.py`). |
 | `tools/check_hidden.py` | Checks `hidden.json` (and `tools/test_check_hidden.py`). |
 | `tools/check_catalog.py` | Checks the app catalog, computes each entry's state and builds its shards (and `tools/test_check_catalog.py`). |
 
-Only recipe files and synthetic or scrubbed fixtures live here. There is no one's real notification
-content, and there are no app icons, logos or other artwork: a recipe names an app by its package
-and describes text, nothing more.
+## How a change gets in
 
-## How a recipe gets in
+1. A pull request changes the categories files (see "App categories"), `hidden.json` (see "Hidden
+   notifications") or `catalog/`.
+2. `check.yml` runs the checks below.
+3. When they pass and the pull request comes from a branch of this repo and touches nothing else, it
+   is merged automatically (main fast-forwards to its commits, so the pull request must be on top of
+   main), except the cases named in "App categories", "Hidden notifications" and "Values", which wait
+   for the owner's merge.
+4. `publish.yml` then checks again, builds the index, signs it, verifies the signature against the
+   committed public key and publishes the site.
 
-1. A pull request adds or changes files under `recipes/`, `fixtures/`, `revoked.txt`, the
-   categories files (see "App categories") or `hidden.json` (see "Hidden notifications").
-2. `check.yml` builds the checker and checks every recipe against the schema and its fixtures. The
-   catalog also refuses any recipe or fixture for a chat app or a health or payment app, the generic
-   recipe (it is built into Glint), a recipe with no fixtures, and any fixture that isn't marked
-   `"scrubbed": true` or `"synthetic": true` or that holds something that looks like an email address,
-   phone number or link.
-3. When the check passes and the pull request comes from a branch of this repo and touches nothing
-   else, it is merged automatically (main fast-forwards to its commits, so the pull request must be
-   on top of main), unless it is a drafted recipe the intake's reviewer hasn't approved or an edit
-   shared from a phone (below), which waits for the owner's merge.
-4. `publish.yml` then checks the catalog again, builds the index, signs it, verifies the signature
-   against the committed public key and publishes the site.
-
-Run the same steps locally (JDK 17 or newer, Python 3):
+Run the same steps locally (Python 3):
 
 ```sh
-./checker/gradlew -p checker check                                     # the whole catalog
-./checker/gradlew -p checker run --args="../recipes ../fixtures ../revoked.txt"
-./checker/gradlew -p checker learn --args="fixtures/com.dd.doordash"   # the shape learner, no AI
-./checker/gradlew -p checker installDist                              # both as jars, for the intake's drafting job
 python tools/check_categories.py                                       # the categories files
 python tools/check_hidden.py                                           # the notifications Glint hides
 python tools/check_catalog.py                                          # the app catalog (add --base <old tree> for the caps)
-python -m unittest discover -s tools                                   # the checker's tests
+python -m unittest discover -s tools                                   # the tests
 python tools/build_index.py --out site                                 # unsigned dry run
 python tools/build_index.py --out site --key test.pem --verify test.pub
 ```
-
-Drafted recipes come from the private intake's nightly job as pull requests from `draft/<package>`
-branches: a `learned` recipe and `fixtures/<package>/drafted.json`, a synthetic fixture the job
-writes with `checker/src/catalog/.../DraftFixture.kt` from a few scrubbed shapes. They go through the
-same check as any other pull request.
-
-### Drafted recipes: the intake's reviewer decides
-
-The owner doesn't review drafts by hand (2026-11-15). The intake's nightly job reviews each draft
-before it opens a pull request (its README, "Nightly drafting"): code first (system packages are never
-drafted; personal data in the recipe or a sensitive class of app goes to the owner), then two judges on
-the intake reviewer's model against the spec's bar (it parses the shapes sensibly, matches on channels,
-categories or templates rather than words alone, makes a calm, useful tile, holds no personal data).
-Then, by code:
-
-- **merge:** a pull request from `draft/<package>` with the `draft-reviewed` label. `check.yml`
-  merges it when the check passes, but only if it changes nothing but `recipes/learned-*.json` and
-  `fixtures/*/drafted.json` (fast-forward, or a merge commit by the Actions bot when the night's other
-  drafts moved main first). The merge publishes it as any push to `main` does.
-- **close:** the pull request is closed at once with the reviewer's one-line reason. Its branch stays,
-  which keeps the app from being drafted again until it is deleted.
-- **escalate:** only when a judge is genuinely unsure or code flagged it: an `escalate/draft-<package>`
-  pull request titled "Owner's call" with a short question. It waits for the owner: merging publishes
-  it, closing turns it down.
-
-Everything else stays held: a `draft/*` pull request without the label, or one that touches any other
-file, and any pull request with a `learned` recipe, a recipe whose notes say a model touched it ("by
-AI"), or a `learned` fixture. Only a token with write access to this repo can push a `draft/*` branch or
-add the label (the owner's and the intake's), never a fork. No bot can merge an overrides file,
-`hidden.json` or `catalog/values.json` or confirm an owner-only value this way (below). Even merged, a
-`learned` recipe isn't dealt or turned on by Glint on its own (see the index's `status`).
-
-### Edits from phones wait for the owner
-
-Glint's tile settings › "edit what it shows" lets a phone's owner pick which of a recipe's own fields
-go on a tile's lines and the order of its faces (never free text), and optionally share that edit
-through the tile exchange. The relay (the intake's `POST /recipe`, `glint.recipe-submit/1`) checks
-it and opens a pull request here from an `edit/<id>-<hash>` branch, with one commit that changes only
-`recipes/<id>.json`: one rev up, `meta.status` `unverified`, its notes starting "Edited on a phone
-with Glint's tile editor" and saying what changed.
-
-An edit is never merged automatically. `check.yml` holds back any pull request from an `edit/*`
-branch, and any that changes a recipe whose notes start "Edited on a phone". The check still runs (an
-edit of a recipe the catalog has no fixtures for, such as one learned on the phone, fails it until
-fixtures come). The owner reads the diff, sets the status back (`verified` once it's checked on
-samples) and merges by hand, or closes it.
-
-`checker/sync-from-glint.sh <path-to-glint-checkout>` re-copies the checker's sources from Glint, and
-the scrubber's common-word list (`checker/src/main/resources/glint/common-words.txt`);
-`checker/VERSION` names the Glint commit they came from.
 
 ## App categories
 
@@ -212,8 +150,8 @@ rule count), as it does the categories; an index without it leaves phones on the
 `tools/check_hidden.py` refuses anything Glint's parser would skip (a bad id or a repeated one, a package
 that isn't an Android package name, a pattern that is only stars or over 200 characters, an unknown
 action, more than 500 rules) and any email address, link or phone number in its text. A pull request
-that changes it merges on its own when the check passes, except from a bot's branch (`categories/*`,
-`draft/*`, `edit/*`), which waits for the owner.
+that changes it merges on its own when the check passes, except from a bot's branch (`categories/*`),
+which waits for the owner.
 
 ## App catalog
 
@@ -285,7 +223,7 @@ enforces it on every pull request and publish, so nothing loosens a limit withou
 changed, and no confirmed game stops being one without an override or a review. The classifier's pull requests
 (`categories/*`) merge on their own. The reviewer agent's escalations come as a weekly `escalate/<date>` pull
 request that waits for the owner: merging it accepts its overrides, closing it rejects them. A pull request from
-a bot's branch (`categories/*`, `draft/*`, `edit/*`) that touches an overrides file waits for the owner too.
+a bot's branch (`categories/*`) that touches an overrides file waits for the owner too.
 
 ### Values
 
@@ -333,37 +271,32 @@ don't know; a change that can't be made that way gets a new format published bes
 
 ## Published format (`glint.exchange/1`)
 
-Base URL (configurable in Glint; default `https://thesiegs.github.io/app-facts/`; Glint reads a saved old `.../glint-recipes/` address as this one):
+Base URL `https://thesiegs.github.io/app-facts/` (Glint reads a saved old `.../glint-recipes/` address as this one):
 
 - `index.json`: UTF-8 JSON
 
   ```
   {"format":"glint.exchange/1","seq":<int, increases every publish>,"issued":"<ISO-8601 UTC>",
-   "apps":{"<package>":{"id":"<recipe id>","rev":<int>,"sha256":"<lowercase hex of the recipe file bytes>",
-                        "status":"<the recipe's meta.status>"}},
-   "revoked":["<recipe id>" | "<recipe id>@<rev>", ...],
+   "apps":{}, "revoked":["<recipe id>" | "<recipe id>@<rev>", ...],
    "categories":{"path":"c/<first 16 hex of sha256>.json","sha256":"<lowercase hex of the file bytes>","count":<int>},
-   "values":{"path":"c/<first 16 hex of sha256>.json","sha256":"...","count":<categories plus details>}}
+   "hidden":{"path":"c/...json","sha256":"...","count":<rules>},
+   "values":{"path":"c/<first 16 hex of sha256>.json","sha256":"...","count":<categories plus details>},
+   "catalog":{"format":"glint.catalog/1","shards":{"<platform>":{"path":"k/<platform>.<hash>.json","sha256":"...","count":<int>}}}}
   ```
 
-  One entry per package: the catalog's best recipe for it (status `verified`, then `built-in`, then
-  `unverified`, then the highest rev; drafts and revoked recipes are left out). `seq` is the Unix time
-  of the publish run in seconds, so it only grows. Unknown keys are ignored. Glint deals a live
-  tile, and turns an app's tile live by itself, only for a `verified` or `built-in` entry; an
-  `unverified` or `learned` one is held off until it is checked against real notifications.
+  `apps` stays (empty) and `revoked` lists the recipe ids once published, so older Glint reads the index
+  and drops any cached recipe. `seq` is the Unix time of the publish run in seconds, so it only grows.
+  Unknown keys are ignored.
 - `c/<hash>.json`: the app categories, `{"format":"glint.categories/1","apps":{"<package>":{"category":"game","name":"Roblox"}}}`,
-  with the overrides applied and `unknown` left out (an app may have only a `name`, a `glance` or a `kind`); an
-  app may carry a `"glance"` and a `"kind"` (above), which older Glint ignores. Named by its
-  content, so it never changes under a cached index; trusted only if its SHA-256 equals the index's
-  `categories` entry. An index without `categories` is fine (older Glint ignores the key).
+  with the overrides applied and `unknown` left out (an app may have only a `name`, a `glance` or a `kind`);
+  also the hidden starter list and the values table. Each is named by its content, so it never changes
+  under a cached index, and trusted only if its SHA-256 equals the index's entry.
+- `k/<platform>.<hash>.json`: the app catalog's shards (see "App catalog").
 - `index.json.sig`: base64 (standard, no line breaks) of the raw 64-byte **Ed25519** signature over
   the exact bytes of `index.json`.
-- `r/<id>.<rev>.json`: the recipe file, an exact copy, immutable per rev. Glint trusts it only if its
-  SHA-256 equals the index entry.
 
-Glint ships one or two public keys and accepts an index signed by any of them. It rejects an index
-whose `seq` is lower than the one it has cached (no rollback). A revoked id (or `id@rev`) is never
-used, even from cache, and its cached file is deleted.
+Readers ship one or two public keys and accept an index signed by any of them, and reject an index
+whose `seq` is lower than the one they have cached (no rollback).
 
 ## Keys and rotation
 
@@ -382,26 +315,18 @@ A key that may have leaked is rotated the same way, at once. Never commit a priv
 
 ## Privacy
 
-The tile exchange is off in Glint by default. When it is **off**, Glint never contacts this catalog
-or anything else for it. When it is **on**:
+Everything published here is about apps, never about people: app names, store ids and categories.
 
-- Glint fetches this small signed index with its usual update check, and a recipe only when you place
-  that app's tile or accept a dealt one. It fetches the app categories file with the index when that
-  file changes; which apps are on the phone is never sent anywhere for it.
-- For an app with no recipe (or one that broke), Glint may share that app's **scrubbed notification
-  layouts**: which fields a notification uses and their shape, with words replaced by placeholders
-  (`Xxxx`) and digits by `9`. Never the content of your notifications, and no account, user or device
-  ids.
-- Nothing is ever shared for health, payment or chat apps.
+- **Glint** downloads the signed index and the files it names with its usual update check (on by
+  default, and its "tile exchange" switch still controls it until a later Glint release builds these
+  lists in). Like any website, the site sees the phone's internet address; nothing else is sent, and
+  which apps are on the phone is never sent. Glint no longer shares notification layouts or tile edits.
+- **Hearth** (Home Assistant) reads the same signed files and sends nothing to fetch them. With its own
+  setting turned on by an HA administrator, it may send the store ids and store titles of public apps
+  the catalog lacks, and corrections an adult chooses to share: no household, person or device id, no
+  usage and no times. The intake only looks them up at their store; they never set a value here by themselves.
 
-Hearth HA reads the same signed files and sends nothing to fetch them. With its own tile exchange setting turned on
-by an HA administrator (asked once, off until then), it may send the store ids and store titles of public apps
-the catalog lacks, and corrections an adult chooses to share: no household, person or device id, no usage and
-no times. The intake only looks them up at their store; they never set a value here by themselves.
-
-Shared layouts go to a private intake, where they may help draft a recipe; only finished recipes and
-synthetic fixtures are ever published here. This notice describes how the software works; it is not
-legal advice.
+This notice describes how the software works; it is not legal advice.
 
 ## License
 

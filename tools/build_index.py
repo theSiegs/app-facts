@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Builds the tile exchange's published site from the catalog (stdlib only).
+"""Builds App Facts' published site (stdlib only). Recipes are no longer published (2026-11-16):
+the index keeps its "apps" ({}) and "revoked" keys so older Glint reads it, and revoked.txt lists every
+recipe id the catalog once published, so phones drop their cached copies.
 
     python tools/build_index.py --out site [--key signing.pem] [--verify keys/exchange-1.pub] [--seq N]
 
@@ -78,6 +80,8 @@ def read_revoked(path):
 
 def read_recipes(folder):
     recipes = []
+    if not os.path.isdir(folder):
+        return recipes  # recipes are no longer published (2026-11-16): the index's "apps" is empty
     for name in sorted(os.listdir(folder)):
         if not name.endswith(".json"):
             continue
