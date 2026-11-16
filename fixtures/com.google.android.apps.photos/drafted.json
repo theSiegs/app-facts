@@ -18,7 +18,9 @@
         "text": "I xxxxx it’s time for a xxxx"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-photos"
+        "recipe": "learned-com-google-android-apps-photos",
+        "title": "A xxxxxxxxx xxxx",
+        "line": "I xxxxx it’s time for a xxxx"
       }
     },
     {
@@ -33,7 +35,9 @@
         "text": "Xxxx them close"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-photos"
+        "recipe": "learned-com-google-android-apps-photos",
+        "title": "Xxxxxxx into the xxx",
+        "line": "Xxxx them close"
       }
     },
     {
@@ -48,7 +52,9 @@
         "text": "In good company"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-photos"
+        "recipe": "learned-com-google-android-apps-photos",
+        "title": "Xxxxxxxxx lineup",
+        "line": "In good company"
       }
     },
     {
@@ -63,7 +69,9 @@
         "text": "New xxxxxx for you"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-photos"
+        "recipe": "learned-com-google-android-apps-photos",
+        "title": "Xxxxx of Xxxxxx 9999",
+        "line": "New xxxxxx for you"
       }
     },
     {
@@ -78,7 +86,9 @@
         "text": "New xxxxxx for you"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-photos"
+        "recipe": "learned-com-google-android-apps-photos",
+        "title": "Xxxxxxxx and Xxxxxxxxxx",
+        "line": "New xxxxxx for you"
       }
     },
     {
@@ -93,7 +103,9 @@
         "text": "New xxxxxx for you"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-photos"
+        "recipe": "learned-com-google-android-apps-photos",
+        "title": "Xxxxx of October 9999",
+        "line": "New xxxxxx for you"
       }
     },
     {
