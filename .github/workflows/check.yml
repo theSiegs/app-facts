@@ -3,12 +3,14 @@
 # this repo that only touches recipes/, fixtures/, revoked.txt or the categories files is merged (main
 # fast-forwards to it) when it passes, and the job then starts publish.yml on main (a GITHUB_TOKEN push
 # starts no push run, but a workflow_dispatch does; on main, so the github-pages environment allows it).
-# Drafted recipes never merge themselves (README, "Drafted recipes wait for the owner"): a pull
-# request from a draft/* branch, or one with a recipe whose status is "learned", whose notes say a
-# model touched it ("by AI", what the intake's drafting job writes), or a fixture whose source is
-# "learned", waits for the owner's merge. So does an owner's edit shared from a phone (README, "Edits
-# from phones wait for the owner"): a pull request from an edit/* branch (the relay's), or one with a
-# recipe whose notes start "Edited on a phone" (what Glint's tile editor writes).
+# Drafted recipes merge only once the intake's reviewer approved them (README, "Drafted recipes"): a pull
+# request from a draft/* branch with the draft-reviewed label that changes only recipes/learned-*.json and
+# fixtures/*/drafted.json merges when it passes. Any other pull request from a draft/* branch, or with a
+# recipe whose status is "learned", whose notes say a model touched it ("by AI", what the intake's
+# drafting job writes), or a fixture whose source is "learned", waits for the owner's merge, as does an
+# escalate/* branch (the reviewers' questions). So does an owner's edit shared from a phone (README,
+# "Edits from phones wait for the owner"): a pull request from an edit/* branch (the relay's), or one
+# with a recipe whose notes start "Edited on a phone" (what Glint's tile editor writes).
 # App categories (README.md, "App categories"): categories.json and categories-overrides.json are
 # checked by tools/check_categories.py (schema, allowed categories, package names, no personal data, at
 # most 60 apps changed per pull request) and merge on their own when they pass.
@@ -27,6 +29,7 @@ name: check
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled] # labeled: a draft approved after it was opened
   push:
     branches-ignore: [main] # main is checked by publish.yml
 
@@ -127,7 +130,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0 # main too, to see whether the pull request fast-forwards it
 
-      - name: Drafted or edited on a phone? Then it waits for the owner
+      - name: Drafted and not approved, or edited on a phone? Then it waits for the owner
         id: drafted
         if: steps.scope.outputs.ok == 'true'
         env:
@@ -136,10 +139,20 @@ jobs:
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           why=""
+          # A draft the intake's reviewer approved: a draft/ branch, the draft-reviewed label (read now, not
+          # from the event), and nothing but learned recipes and their drafted fixtures.
+          reviewed=false
           case "$HEAD_REF" in
-            draft/*) why="it comes from a draft/ branch" ;;
+            draft/*)
+              if gh api "repos/$GITHUB_REPOSITORY/issues/$PR/labels" --jq '.[].name' | grep -qx 'draft-reviewed'; then
+                other="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[] | .filename, (.previous_filename // empty)' | grep -vE '^(recipes/learned-[a-z0-9-]+\.json|fixtures/[^/]+/drafted\.json)$' || true)"
+                if [ -z "$other" ]; then reviewed=true; else why="a reviewed draft changes more than its recipe and drafted fixture"; fi
+              fi ;;
+          esac
+          case "$HEAD_REF" in
+            draft/*) [ "$reviewed" = true ] || why="${why:-it comes from a draft/ branch the intake's reviewer hasn't approved (no draft-reviewed label)}" ;;
             edit/*) why="it is an edit shared from a phone (an edit/ branch)" ;;
-            escalate/*) why="it holds the reviewer agent's escalations (an escalate/ branch)" ;;
+            escalate/*) why="it holds a reviewer's question for the owner (an escalate/ branch)" ;;
           esac
           case "$HEAD_REF" in
             categories/*|draft/*|edit/*)
@@ -153,21 +166,22 @@ jobs:
             [ -f "$f" ] || continue
             case "$f" in
               recipes/*.json)
-                if jq -e '(.meta.status // "") == "learned" or ((.meta.notes // "") | test("\\bby AI\\b"))' "$f" >/dev/null 2>&1; then
+                if [ "$reviewed" != true ] && jq -e '(.meta.status // "") == "learned" or ((.meta.notes // "") | test("\\bby AI\\b"))' "$f" >/dev/null 2>&1; then
                   why="$f was learned or touched by a model"
                 elif jq -e '(.meta.notes // "") | test("^Edited on a phone"; "i")' "$f" >/dev/null 2>&1; then
                   why="$f is an edit shared from a phone"
                 fi ;;
               fixtures/*.json)
-                if jq -e '(.source // "") == "learned"' "$f" >/dev/null 2>&1; then why="$f holds learned shapes"; fi ;;
+                if [ "$reviewed" != true ] && jq -e '(.source // "") == "learned"' "$f" >/dev/null 2>&1; then why="$f holds learned shapes"; fi ;;
             esac
           done <<< "$files"
           if [ -n "$why" ]; then
-            echo "::notice::Not auto-merged: a drafted or phone-edited recipe waits for the owner's merge ($why)."
+            echo "::notice::Not auto-merged: it waits for the owner's merge ($why)."
             echo "held=true" >> "$GITHUB_OUTPUT"
           else
             echo "held=false" >> "$GITHUB_OUTPUT"
           fi
+          echo "reviewed=$reviewed" >> "$GITHUB_OUTPUT"
 
       - name: Merge (fast-forward)
         id: merge
@@ -176,12 +190,22 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR: ${{ github.event.pull_request.number }}
+          REVIEWED: ${{ steps.drafted.outputs.reviewed }}
         # main moves to the pull request's own commits (GitHub then marks it merged), so no commit is made
         # here and none carries an account's email. GitHub refuses a squash merge's author email for the
         # Actions bot, and without one a squash commit would carry the pull request author's.
+        # A reviewed draft that main has moved past (the night's other drafts merged first) gets a merge
+        # commit instead, by the Actions bot: it touches only its own recipe and drafted fixture.
         run: |
           remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           if ! git merge-base --is-ancestor origin/main "$HEAD_SHA"; then
+            if [ "$REVIEWED" = true ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/pulls/$PR/merge" -f merge_method=merge -f sha="$HEAD_SHA" --jq .message
+              git push -q "$remote" --delete "$HEAD_REF" || true
+              gh workflow run publish.yml -R "$GITHUB_REPOSITORY" --ref main
+              exit 0
+            fi
             echo "::notice::Not auto-merged: the pull request isn't on top of main; update its branch (or merge it by hand)."
             exit 0
           fi

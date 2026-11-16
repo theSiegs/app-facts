@@ -38,8 +38,8 @@ and describes text, nothing more.
    phone number or link.
 3. When the check passes and the pull request comes from a branch of this repo and touches nothing
    else, it is merged automatically (main fast-forwards to its commits, so the pull request must be
-   on top of main), unless it is a drafted recipe or an edit shared from a phone (below), which
-   waits for the owner's merge.
+   on top of main), unless it is a drafted recipe the intake's reviewer hasn't approved or an edit
+   shared from a phone (below), which waits for the owner's merge.
 4. `publish.yml` then checks the catalog again, builds the index, signs it, verifies the signature
    against the committed public key and publishes the site.
 
@@ -63,20 +63,31 @@ branches: a `learned` recipe and `fixtures/<package>/drafted.json`, a synthetic 
 writes with `checker/src/catalog/.../DraftFixture.kt` from a few scrubbed shapes. They go through the
 same check as any other pull request.
 
-### Drafted recipes wait for the owner
+### Drafted recipes: the intake's reviewer decides
 
-A drafted recipe is never merged automatically. `check.yml` holds back any pull request from a
-`draft/*` branch, and any that adds or changes a recipe whose `meta.status` is `learned` or whose
-notes say a model touched it ("by AI", which the intake's drafting job writes), or a fixture whose
-`source` is `learned`. The check still runs; the owner reads the recipe and merges it by hand, and
-the merge publishes it as any push to `main` does. Every other pull request keeps the auto-merge.
+The owner doesn't review drafts by hand (2026-11-15). The intake's nightly job reviews each draft
+before it opens a pull request (its README, "Nightly drafting"): code first (system packages are never
+drafted; personal data in the recipe or a sensitive class of app goes to the owner), then two judges on
+the intake reviewer's model against the spec's bar (it parses the shapes sensibly, matches on channels,
+categories or templates rather than words alone, makes a calm, useful tile, holds no personal data).
+Then, by code:
 
-Why: a drafted recipe's quality bar today is only "it draws a face", and the model may write the
-tile's words from scrubbed text a phone sent. The human merge stays until two things exist: a check
-that shows a draft beats the generic tile (it draws something the generic one wouldn't, on most of
-its shapes), and model-written words restricted to a known vocabulary (the common-word list and the
-learner's own words). Even merged, a `learned` recipe isn't dealt or turned on by Glint on its own
-(see the index's `status`).
+- **merge:** a pull request from `draft/<package>` with the `draft-reviewed` label. `check.yml`
+  merges it when the check passes, but only if it changes nothing but `recipes/learned-*.json` and
+  `fixtures/*/drafted.json` (fast-forward, or a merge commit by the Actions bot when the night's other
+  drafts moved main first). The merge publishes it as any push to `main` does.
+- **close:** the pull request is closed at once with the reviewer's one-line reason. Its branch stays,
+  which keeps the app from being drafted again until it is deleted.
+- **escalate:** only when a judge is genuinely unsure or code flagged it: an `escalate/draft-<package>`
+  pull request titled "Owner's call" with a short question. It waits for the owner: merging publishes
+  it, closing turns it down.
+
+Everything else stays held: a `draft/*` pull request without the label, or one that touches any other
+file, and any pull request with a `learned` recipe, a recipe whose notes say a model touched it ("by
+AI"), or a `learned` fixture. Only a token with write access to this repo can push a `draft/*` branch or
+add the label (the owner's and the intake's), never a fork. No bot can merge an overrides file,
+`hidden.json` or `catalog/values.json` or confirm an owner-only value this way (below). Even merged, a
+`learned` recipe isn't dealt or turned on by Glint on its own (see the index's `status`).
 
 ### Edits from phones wait for the owner
 
