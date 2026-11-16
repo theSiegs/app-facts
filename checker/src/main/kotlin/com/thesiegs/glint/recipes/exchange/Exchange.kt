@@ -96,7 +96,20 @@ object Exchange {
     const val FORMAT = "glint.exchange/1"
     const val INDEX = "index.json"
     const val SIG = "index.json.sig"
-    const val DEFAULT_BASE = "https://thesiegs.github.io/glint-recipes/"
+    const val DEFAULT_BASE = "https://thesiegs.github.io/app-facts/"
+    /** The catalog's address before its repo became app-facts (2026-11); that page is gone. */
+    const val OLD_BASE = "https://thesiegs.github.io/glint-recipes/"
+
+    /**
+     * The base URL to use for a saved or typed one: blank is [DEFAULT_BASE], the catalog's old
+     * address ([OLD_BASE], with or without its slash) is [DEFAULT_BASE] too, and any other keeps
+     * its own address with a trailing slash.
+     */
+    fun base(saved: String?): String {
+        val clean = saved?.trim().orEmpty()
+        if (clean.isEmpty() || clean.trimEnd('/').equals(OLD_BASE.trimEnd('/'), ignoreCase = true)) return DEFAULT_BASE
+        return if (clean.endsWith("/")) clean else "$clean/"
+    }
 
     /** The keys Glint ships (exchange-1 now, exchange-2 for rotation): an index signed by either is accepted. */
     val Keys: List<ExchangeKey> = listOf(

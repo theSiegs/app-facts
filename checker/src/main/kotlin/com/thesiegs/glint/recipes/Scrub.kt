@@ -157,7 +157,7 @@ object Scrubber {
 
     /**
      * SHA-256 of the list's words ([wordsDigest]). The relay's test pins the same value
-     * (glint-recipes-intake relay/test/words.test.js), so one list changed without the other fails a test.
+     * (app-facts-intake relay/test/words.test.js), so one list changed without the other fails a test.
      */
     const val WORDS_SHA256 = "2feed4f48af6daf324f4d2bdc5c121f6e80cbc57483d1fe784b05f8b7bc7c41c"
 

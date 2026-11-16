@@ -1,4 +1,4 @@
-# Glint tile exchange catalog
+# App facts: the Glint tile exchange catalog
 
 This is the catalog behind Glint's **community live tile exchange**: small data files ("recipes")
 that tell the Glint launcher how to turn one app's notifications into a live tile (a delivery's
@@ -333,7 +333,7 @@ don't know; a change that can't be made that way gets a new format published bes
 
 ## Published format (`glint.exchange/1`)
 
-Base URL (configurable in Glint; default `https://thesiegs.github.io/glint-recipes/`):
+Base URL (configurable in Glint; default `https://thesiegs.github.io/app-facts/`; Glint reads a saved old `.../glint-recipes/` address as this one):
 
 - `index.json`: UTF-8 JSON
 

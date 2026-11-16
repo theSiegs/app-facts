@@ -1,7 +1,7 @@
 # Glint's common words (recipes/SPEC.md §10): the only words the sample scrubber keeps as they are.
 # Every other word, in any case, becomes a placeholder of the same shape (Xxxx, xxxx, XXXX).
 # One list for the phone (glint-recipes Scrubber), the catalog's checker and the tile exchange's
-# relay (glint-recipes-intake relay/src/words.js): change it in all three; their tests pin its digest.
+# relay (app-facts-intake relay/src/words.js): change it in all three; their tests pin its digest.
 # Frequent English words and words apps use in notifications. Never a word that is also a common
 # first name or surname (bill, rose, grace, hunter, brown, mason...), a place or a brand.
 # Whitespace-separated, lowercase ASCII; a line starting with # is a comment.
