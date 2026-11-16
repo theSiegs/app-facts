@@ -10,7 +10,7 @@
   "meta": {
     "status": "learned",
     "author": "Glint",
-    "notes": "Learned from 30 notification shapes over 4 days.",
+    "notes": "Learned from 30 notification shapes over 4 days. Reviewed: the commute's words as the line (\"heavy traffic\"); no count flip.",
     "updated": "2026-11-14"
   },
   "source": {
@@ -35,16 +35,15 @@
   "faces": [
     {
       "title": "{title}",
-      "peek": "{time}"
+      "line": "{text}",
+      "peek": "{posted|ago}"
     },
     {
-      "kind": "count",
-      "count": "{count}",
-      "label": "new",
+      "title": "{title}",
+      "peek": "{posted|ago}",
       "when": [
-        "count>1"
-      ],
-      "flip": true
+        "!text"
+      ]
     }
   ]
 }
