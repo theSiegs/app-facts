@@ -10,7 +10,7 @@
   "meta": {
     "status": "learned",
     "author": "Glint",
-    "notes": "Learned from 7 notification shapes over 5 days.",
+    "notes": "Learned from 7 notification shapes over 5 days. Reviewed: the event and its time, with how soon it starts as the peek; no count flip.",
     "updated": "2026-11-14"
   },
   "source": {
@@ -35,23 +35,14 @@
     {
       "title": "{title}",
       "line": "{text}",
-      "peek": "{time}"
+      "peek": "{when|near}"
     },
     {
       "title": "{title}",
-      "peek": "{time}",
+      "line": "{when|near}",
       "when": [
         "!text"
       ]
-    },
-    {
-      "kind": "count",
-      "count": "{count}",
-      "label": "new",
-      "when": [
-        "count>1"
-      ],
-      "flip": true
     }
   ]
 }

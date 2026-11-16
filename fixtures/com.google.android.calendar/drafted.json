@@ -21,7 +21,9 @@
         "subText": "alex@example.com"
       },
       "expect": {
-        "recipe": "learned-com-google-android-calendar"
+        "recipe": "learned-com-google-android-calendar",
+        "title": "‎‪The Xxxxxx Family‬‎",
+        "line": "‎‪9 – 9 PM‬‎"
       }
     },
     {
@@ -39,7 +41,9 @@
         "subText": "alex@example.com"
       },
       "expect": {
-        "recipe": "learned-com-google-android-calendar"
+        "recipe": "learned-com-google-android-calendar",
+        "title": "‎‪Coffee xxxxxx at Xxxxxxxxxxx 9-9:99am‬‎",
+        "line": "‎‪9:99 – 9:99 AM‬‎"
       }
     },
     {
@@ -57,7 +61,9 @@
         "subText": "alex@example.com"
       },
       "expect": {
-        "recipe": "learned-com-google-android-calendar"
+        "recipe": "learned-com-google-android-calendar",
+        "title": "‎‪Xxxxx: Xxxxxx‬‎",
+        "line": "‎‪9:99 – 9:99 PM‬‎"
       }
     },
     {
@@ -75,7 +81,9 @@
         "subText": "alex@example.com"
       },
       "expect": {
-        "recipe": "learned-com-google-android-calendar"
+        "recipe": "learned-com-google-android-calendar",
+        "title": "‎‪Pick up xxxxxxx‬‎",
+        "line": "‎‪9:99 – 9:99 PM‬‎"
       }
     }
   ]
