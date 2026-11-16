@@ -10,7 +10,7 @@
   "meta": {
     "status": "learned",
     "author": "Glint",
-    "notes": "Learned from 21 notification shapes over 10 days.",
+    "notes": "Learned from 21 notification shapes over 10 days. Reviewed: a memory's own picture behind its words from Large up; no count flip.",
     "updated": "2026-11-14"
   },
   "source": {
@@ -35,23 +35,16 @@
     {
       "title": "{title}",
       "line": "{text}",
-      "peek": "{time}"
+      "peek": "{posted|ago}",
+      "picture": "picture"
     },
     {
       "title": "{title}",
-      "peek": "{time}",
+      "peek": "{posted|ago}",
+      "picture": "picture",
       "when": [
         "!text"
       ]
-    },
-    {
-      "kind": "count",
-      "count": "{count}",
-      "label": "new",
-      "when": [
-        "count>1"
-      ],
-      "flip": true
     }
   ]
 }
