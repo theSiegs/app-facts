@@ -17,7 +17,8 @@
         "title": "Starting xxxxxxxxxx…"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-maps"
+        "recipe": "learned-com-google-android-apps-maps",
+        "title": "Starting xxxxxxxxxx…"
       }
     },
     {
@@ -30,7 +31,9 @@
         "text": "9 min xxxxxx than usual · Heavy traffic"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-maps"
+        "recipe": "learned-com-google-android-apps-maps",
+        "title": "9 hr 9 min to work",
+        "line": "9 min xxxxxx than usual · Heavy traffic"
       }
     },
     {
@@ -43,7 +46,9 @@
         "text": "Xxxxxxxx • 9.9 xx xxxxx"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-maps"
+        "recipe": "learned-com-google-android-apps-maps",
+        "title": "99 min delay • Xxxxxxxxxx 999",
+        "line": "Xxxxxxxx • 9.9 xx xxxxx"
       }
     },
     {
@@ -57,7 +62,8 @@
         "title": "Driving with Google Maps"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-maps"
+        "recipe": "learned-com-google-android-apps-maps",
+        "title": "Driving with Google Maps"
       }
     },
     {
@@ -71,7 +77,8 @@
         "title": "99A"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-maps"
+        "recipe": "learned-com-google-android-apps-maps",
+        "title": "99A"
       }
     },
     {
@@ -85,7 +92,8 @@
         "title": "Xxxxxxxx Xxxx"
       },
       "expect": {
-        "recipe": "learned-com-google-android-apps-maps"
+        "recipe": "learned-com-google-android-apps-maps",
+        "title": "Xxxxxxxx Xxxx"
       }
     }
   ]
