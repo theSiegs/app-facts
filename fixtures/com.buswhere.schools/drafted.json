@@ -18,7 +18,9 @@
         "bigText": "XXXX XXXXXX XX - XXXXXX XX - XXXXX BUS - PM is on its way to Depart Xxxx Xxxxxx Xxxxxxxxxx. Tap for real-time map view and updated XXXx."
       },
       "expect": {
-        "recipe": "learned-com-buswhere-schools"
+        "recipe": "learned-com-buswhere-schools",
+        "title": "Your bus will be there soon",
+        "line": "to Depart Xxxx Xxxxxx Xxxxxxxxxx"
       }
     },
     {
@@ -33,7 +35,9 @@
         "bigText": "XXXX XXXXXX XX - XXXXXX XX - XXXXX BUS - PM is on its way to Xxxxxx Xx & Xxxxxx Xxx. Tap for real-time map view and updated XXXx."
       },
       "expect": {
-        "recipe": "learned-com-buswhere-schools"
+        "recipe": "learned-com-buswhere-schools",
+        "title": "Your bus will be there soon",
+        "line": "to Xxxxxx Xx & Xxxxxx Xxx"
       }
     }
   ]
