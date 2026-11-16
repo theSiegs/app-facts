@@ -10,7 +10,7 @@
   "meta": {
     "status": "learned",
     "author": "Glint",
-    "notes": "Learned from 7 notification shapes over 4 days.",
+    "notes": "Learned from 7 notification shapes over 4 days. Reviewed: the stop it is headed to as the line; fades after 30 min, gone after 3 h.",
     "updated": "2026-11-13"
   },
   "source": {
@@ -34,10 +34,17 @@
         "lang": [
           "en"
         ]
-      }
+      },
+      "fade": "30m",
+      "expire": "3h"
     }
   },
   "faces": [
+    {
+      "title": "{title}",
+      "line": "to {to}",
+      "peek": "{posted|ago}"
+    },
     {
       "title": "{title}",
       "line": "{text}",
@@ -59,5 +66,21 @@
       ],
       "flip": true
     }
-  ]
+  ],
+  "fields": {
+    "to": {
+      "from": [
+        "text",
+        "bigText"
+      ],
+      "regex": "(?i)\\bon its way to (?P<v>[^.]{1,60}?)\\s*\\.",
+      "lang": [
+        "en"
+      ],
+      "then": [
+        "collapse",
+        "shorten:32"
+      ]
+    }
+  }
 }
