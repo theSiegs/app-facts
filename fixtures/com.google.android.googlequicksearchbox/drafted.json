@@ -19,7 +19,9 @@
         "bigText": "Clear with xxxxxxxx xxxxxx · See full xxxxxxxx"
       },
       "expect": {
-        "recipe": "learned-com-google-android-googlequicksearchbox"
+        "recipe": "learned-com-google-android-googlequicksearchbox",
+        "title": "99° in Xxxxxxxxxxxx",
+        "line": "Clear with xxxxxxxx xxxxxx"
       }
     },
     {
@@ -35,7 +37,9 @@
         "bigText": "Xxxxxx xxxxxx · See full xxxxxxxx"
       },
       "expect": {
-        "recipe": "learned-com-google-android-googlequicksearchbox"
+        "recipe": "learned-com-google-android-googlequicksearchbox",
+        "title": "99° in Xxxxxxxxxxxx",
+        "line": "Xxxxxx xxxxxx"
       }
     },
     {
@@ -51,7 +55,9 @@
         "bigText": "Clear · See full xxxxxxxx"
       },
       "expect": {
-        "recipe": "learned-com-google-android-googlequicksearchbox"
+        "recipe": "learned-com-google-android-googlequicksearchbox",
+        "title": "99° in Xxxxxxxxxxxx",
+        "line": "Clear"
       }
     },
     {
@@ -67,7 +73,9 @@
         "bigText": "Xxxxx like 99° · Clear · See full xxxxxxxx"
       },
       "expect": {
-        "recipe": "learned-com-google-android-googlequicksearchbox"
+        "recipe": "learned-com-google-android-googlequicksearchbox",
+        "title": "99° in Xxxxxxxxxxxx",
+        "line": "Xxxxx like 99° · Clear"
       }
     },
     {
@@ -83,7 +91,9 @@
         "bigText": "Xxxxx like 99° · Clear with xxxxxxxx xxxxxx · See full xxxxxxxx"
       },
       "expect": {
-        "recipe": "learned-com-google-android-googlequicksearchbox"
+        "recipe": "learned-com-google-android-googlequicksearchbox",
+        "title": "99° in Xxxxxxxxxxxx",
+        "line": "Xxxxx like 99° · Clear with xxxxxxxx xxxxxx"
       }
     },
     {
@@ -99,7 +109,9 @@
         "bigText": "99° / 99° · See full xxxxxxxx for Xxxxxxxxxxxx"
       },
       "expect": {
-        "recipe": "learned-com-google-android-googlequicksearchbox"
+        "recipe": "learned-com-google-android-googlequicksearchbox",
+        "title": "Xxxxxx afternoon",
+        "line": "99° / 99°"
       }
     }
   ]

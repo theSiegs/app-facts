@@ -10,7 +10,7 @@
   "meta": {
     "status": "learned",
     "author": "Glint",
-    "notes": "Learned from 30 notification shapes over 2 days.",
+    "notes": "Learned from 30 notification shapes over 2 days. Reviewed: the weather without its \"see full forecast\" link words; fades after 3 h, gone after 12 h; no count flip.",
     "updated": "2026-11-15"
   },
   "source": {
@@ -34,30 +34,34 @@
         "lang": [
           "en"
         ]
-      }
+      },
+      "fade": "3h",
+      "expire": "12h"
     }
   },
   "faces": [
     {
       "title": "{title}",
-      "line": "{text}",
-      "peek": "{time}"
+      "line": "{sky}",
+      "peek": "{posted|ago}"
     },
     {
       "title": "{title}",
-      "peek": "{time}",
-      "when": [
-        "!text"
-      ]
-    },
-    {
-      "kind": "count",
-      "count": "{count}",
-      "label": "new",
-      "when": [
-        "count>1"
-      ],
-      "flip": true
+      "peek": "{posted|ago}"
     }
-  ]
+  ],
+  "fields": {
+    "sky": {
+      "from": [
+        "text"
+      ],
+      "regex": "(?i)^(?P<v>.+?)\\s*·\\s*see full\\b",
+      "lang": [
+        "en"
+      ],
+      "then": [
+        "collapse"
+      ]
+    }
+  }
 }
