@@ -362,7 +362,7 @@
     "org.videolan.vlc": {"category": "video", "name": "VLC for Android", "source": "play:VIDEO_PLAYERS", "checked": "2026-11-07"},
     "tunein.player": {"category": "audio", "name": "TuneIn Radio: Music & Sports", "source": "play:MUSIC_AND_AUDIO", "checked": "2026-11-08"},
     "tv.pluto.android": {"category": "video", "name": "Pluto TV: Watch Free Movies/TV", "source": "ai:ENTERTAINMENT", "checked": "2026-11-07", "detail": "streaming"},
-    "tv.twitch.android.app": {"category": "video", "name": "Twitch: Live Streaming", "source": "ai:ENTERTAINMENT", "checked": "2026-11-07"},
+    "tv.twitch.android.app": {"category": "video", "name": "Twitch: Live Streaming", "source": "ai:ENTERTAINMENT", "checked": "2026-11-07", "detail": "streaming"},
     "us.zoom.videomeetings": {"category": "productivity", "name": "Zoom Workplace", "source": "play:BUSINESS", "checked": "2026-11-10"},
     "wp.wattpad": {"category": "unknown", "name": "Wattpad - Read & Write Stories", "source": "play:BOOKS_AND_REFERENCE", "checked": "2026-11-09"},
     "xyz.blueskyweb.app": {"category": "social", "name": "Bluesky", "source": "play:SOCIAL", "checked": "2026-11-09"}
